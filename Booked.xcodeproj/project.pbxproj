@@ -17,6 +17,8 @@
 		447D57302BB1EF610075BAB3 /* ActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447D572F2BB1EF610075BAB3 /* ActionButton.swift */; };
 		447D57332BB1EF7E0075BAB3 /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447D57322BB1EF7E0075BAB3 /* ColorExtensions.swift */; };
 		447D57352BB1EFD00075BAB3 /* SingleBookCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447D57342BB1EFD00075BAB3 /* SingleBookCard.swift */; };
+		447D57372BB1F0A10075BAB3 /* ReadingListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447D57362BB1F0A10075BAB3 /* ReadingListView.swift */; };
+		447D57392BB1F0D20075BAB3 /* BookItemInGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447D57382BB1F0D20075BAB3 /* BookItemInGrid.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +33,8 @@
 		447D572F2BB1EF610075BAB3 /* ActionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionButton.swift; sourceTree = "<group>"; };
 		447D57322BB1EF7E0075BAB3 /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
 		447D57342BB1EFD00075BAB3 /* SingleBookCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleBookCard.swift; sourceTree = "<group>"; };
+		447D57362BB1F0A10075BAB3 /* ReadingListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadingListView.swift; sourceTree = "<group>"; };
+		447D57382BB1F0D20075BAB3 /* BookItemInGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookItemInGrid.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,6 +92,7 @@
 			children = (
 				447D572A2BB1EEC70075BAB3 /* DiscoverView.swift */,
 				447D572C2BB1EED30075BAB3 /* LibraryView.swift */,
+				447D57362BB1F0A10075BAB3 /* ReadingListView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -97,6 +102,7 @@
 			children = (
 				447D572F2BB1EF610075BAB3 /* ActionButton.swift */,
 				447D57342BB1EFD00075BAB3 /* SingleBookCard.swift */,
+				447D57382BB1F0D20075BAB3 /* BookItemInGrid.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -187,6 +193,8 @@
 				447D57302BB1EF610075BAB3 /* ActionButton.swift in Sources */,
 				447D57352BB1EFD00075BAB3 /* SingleBookCard.swift in Sources */,
 				447D57332BB1EF7E0075BAB3 /* ColorExtensions.swift in Sources */,
+				447D57392BB1F0D20075BAB3 /* BookItemInGrid.swift in Sources */,
+				447D57372BB1F0A10075BAB3 /* ReadingListView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
