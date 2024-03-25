@@ -12,6 +12,8 @@ struct SearchView: View {
     // MARK: - ViewModels
     @StateObject var searchViewModel = SearchViewModel()
     
+    @State var list: String
+    
     var body: some View {
         NavigationStack{
             
@@ -19,7 +21,7 @@ struct SearchView: View {
                 LazyVStack(spacing: 15){
                     if searchViewModel.searchTerm != "" {
                         ForEach(searchViewModel.books) { book in
-                            BookItemInSearch(book: book)
+                            BookItemInSearch(bookLocal: book, list: self.list)
                         }
                     }
                 }
@@ -51,5 +53,5 @@ struct SearchView: View {
 }
 
 #Preview {
-    SearchView()
+    SearchView(list: "finishedBook")
 }

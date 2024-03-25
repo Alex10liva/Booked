@@ -8,11 +8,6 @@
 import Foundation
 import SwiftData
 
-enum ListType: Codable{
-    case readingList
-    case finishedList
-}
-
 @Model
 final class Book {
     var id: String?
@@ -29,10 +24,10 @@ final class Book {
     var language: String?
     var previewLink: String?
     var infoLink: String?
-    var list: ListType
+    var list: String
     var addedDate: Date?
     
-    init(id: String?, title: String?, authors: [String]?, publisher: String?, publishedDate: String?, descriptionStored: String?, imageLinks: ImageLinks?, categories: [String]?, averageRating: Double?, ratingsCount: Int?, pageCount: Int?, language: String?, previewLink: String?, infoLink: String?, list: ListType, addedDate: Date?) {
+    init(id: String?, title: String?, authors: [String]?, publisher: String?, publishedDate: String?, descriptionStored: String?, imageLinks: ImageLinks?, categories: [String]?, averageRating: Double?, ratingsCount: Int?, pageCount: Int?, language: String?, previewLink: String?, infoLink: String?, list: String, addedDate: Date?) {
         self.id = id
         self.title = title
         self.authors = authors

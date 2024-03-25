@@ -1,5 +1,5 @@
 //
-//  ReadingListView.swift
+//  FinishedListView.swift
 //  Booked
 //
 //  Created by Alejandro Oliva Ochoa on 25/03/24.
@@ -8,11 +8,11 @@
 import SwiftUI
 import SwiftData
 
-struct ReadingListView: View {
+struct FinishedListView: View {
     
     @Environment(\.modelContext) private var modelContext
     @Query(filter: #Predicate<Book> { book in
-        book.list == "readingList"
+        book.list == "finishedList"
     }) private var items: [Book]
     
     @State private var isAddSheetDisplayed: Bool = false
@@ -37,5 +37,5 @@ struct ReadingListView: View {
 }
 
 #Preview {
-    ReadingListView()
+    FinishedListView()
 }
