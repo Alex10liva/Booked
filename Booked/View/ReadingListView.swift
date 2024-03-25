@@ -53,6 +53,9 @@ struct ReadingListView: View {
                                 .font(.headline)
                         }
                         .foregroundStyle(Color.accent)
+                        .sheet(isPresented: $isAddSheetDisplayed){
+                            SearchView()
+                        }
                     }
                     
                     .bold()
