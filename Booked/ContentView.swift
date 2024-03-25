@@ -13,32 +13,16 @@ struct ContentView: View {
     @Query private var items: [Book]
 
     var body: some View {
-        NavigationStack {
-            List {
-                ForEach(items) { book in
-                    VStack{
-                        if let title = book.title{
-                            Text(title)
-                        }
-                    }
+        TabView{
+            DiscoverView()
+                .tabItem {
+                    Label("Discover", systemImage: "sparkles")
                 }
-                .onDelete(perform: deleteItems)
-            }
-        }
-    }
-
-    private func addItem(with book: Book) {
-        withAnimation {
-            let newItem = book
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
+            
+            LibraryView()
+                .tabItem {
+                    Label("Library", systemImage: "books.vertical.fill")
+                }
         }
     }
 }
