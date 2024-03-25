@@ -16,6 +16,7 @@
 		447D572D2BB1EED30075BAB3 /* LibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447D572C2BB1EED30075BAB3 /* LibraryView.swift */; };
 		447D57302BB1EF610075BAB3 /* ActionButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447D572F2BB1EF610075BAB3 /* ActionButton.swift */; };
 		447D57332BB1EF7E0075BAB3 /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447D57322BB1EF7E0075BAB3 /* ColorExtensions.swift */; };
+		447D57352BB1EFD00075BAB3 /* SingleBookCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 447D57342BB1EFD00075BAB3 /* SingleBookCard.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +30,7 @@
 		447D572C2BB1EED30075BAB3 /* LibraryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryView.swift; sourceTree = "<group>"; };
 		447D572F2BB1EF610075BAB3 /* ActionButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionButton.swift; sourceTree = "<group>"; };
 		447D57322BB1EF7E0075BAB3 /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
+		447D57342BB1EFD00075BAB3 /* SingleBookCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleBookCard.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -94,6 +96,7 @@
 			isa = PBXGroup;
 			children = (
 				447D572F2BB1EF610075BAB3 /* ActionButton.swift */,
+				447D57342BB1EFD00075BAB3 /* SingleBookCard.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -182,6 +185,7 @@
 				447D572D2BB1EED30075BAB3 /* LibraryView.swift in Sources */,
 				447D572B2BB1EEC70075BAB3 /* DiscoverView.swift in Sources */,
 				447D57302BB1EF610075BAB3 /* ActionButton.swift in Sources */,
+				447D57352BB1EFD00075BAB3 /* SingleBookCard.swift in Sources */,
 				447D57332BB1EF7E0075BAB3 /* ColorExtensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
