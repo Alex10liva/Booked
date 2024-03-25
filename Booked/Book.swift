@@ -22,13 +22,13 @@ final class Book {
     var publishedDate: String?
     var descriptionStored: String?
     var imageLinks: ImageLinks?
-    var categories: [String]? // Categorías del libro
-    var averageRating: Double? // Calificación promedio del libro
-    var ratingsCount: Int? // Número de calificaciones recibidas
-    var pageCount: Int? // Número de páginas del libro
-    var language: String? // Idioma del libro
-    var previewLink: String? // Enlace de vista previa del libro
-    var infoLink: String? // Enlace de información adicional sobre el libro
+    var categories: [String]?
+    var averageRating: Double?
+    var ratingsCount: Int?
+    var pageCount: Int?
+    var language: String?
+    var previewLink: String?
+    var infoLink: String?
     var list: ListType
     var addedDate: Date?
     
