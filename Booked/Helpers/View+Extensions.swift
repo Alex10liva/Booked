@@ -15,6 +15,7 @@ struct OffsetKey: PreferenceKey{
 }
 
 extension View{
+    
     @ViewBuilder
     func offsetX(completion: @escaping (CGFloat) -> ()) -> some View {
         self
@@ -33,7 +34,7 @@ extension View{
     func tabMask(_ tabProgress: CGFloat) -> some View {
         ZStack{
             self
-                .foregroundStyle(.gray)
+                .foregroundStyle(.secondary)
             
             self
                 .symbolVariant(.fill)
