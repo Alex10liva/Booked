@@ -20,12 +20,13 @@ struct BookItemInSearch: View {
     @State var imageLoaded: Bool = false
     @State var imageURLs: [String] = []
     @State var list: String
+    @State var sendHapticFeedback: Bool = false
     
     var body: some View {
         HStack{
-            if !imageURLs.isEmpty {
                 
-                KFImage(URL(string: imageURLs[0]))
+            if let extraLarge = bookLocal.imageLinks?.extraLarge{
+                KFImage(URL(string: extraLarge))
                     .onSuccess{ result in
                         withAnimation(.spring(response: 0.5, dampingFraction: 0.6)){
                             imageLoaded = true
@@ -49,6 +50,33 @@ struct BookItemInSearch: View {
                     .clipShape(RoundedRectangle(cornerRadius: 5))
                     .frame(width: 60)
                     .padding(.trailing)
+            } else {
+                if let id = bookLocal.id {
+                    KFImage(URL(string: "https://books.google.com/books/publisher/content/images/frontcover/\(id)?fife=w1200&source=gbs_api"))
+                        .onSuccess{ result in
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.6)){
+                                imageLoaded = true
+                            }
+                        }
+                        .placeholder { progress in
+                            Rectangle()
+                                .fill(.primary.opacity(0.5))
+                                .clipShape(RoundedRectangle(cornerRadius: 5))
+                                .frame(width: 60, height: 90)
+                                .overlay{
+                                    ProgressView()
+                                        .progressViewStyle(.circular)
+                                }
+                                .padding(.leading)
+                                .padding(.trailing)
+                        }
+                        .fade(duration: 0.5)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                        .frame(width: 60)
+                        .padding(.trailing)
+                }
             }
             
             VStack(alignment: .leading){
@@ -64,19 +92,37 @@ struct BookItemInSearch: View {
                     Text(concatAuthors(for: authors))
                         .font(.footnote)
                         .lineLimit(2)
-                        .foregroundStyle(.secondary)
+                }
+                
+                if let averageRating = bookLocal.averageRating {
+                    HStack(spacing: 5){
+                        Image(systemName: "star.fill")
+                            .font(.caption2)
+                            .bold()
+                        
+                        Text(String(averageRating))
+                        
+                        if let ratingsCount = bookLocal.ratingsCount {
+                            Text("(\(String(ratingsCount)))")
+                                .foregroundStyle(.secondary.opacity(0.6))
+                        }
+                    }
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
                 }
             }
             Spacer()
             
             Button{
                 addItem(with: self.bookLocal)
+                sendHapticFeedback.toggle()
                 dismiss()
             } label: {
                 Image(systemName: "plus.circle")
                     .font(.title3)
                     .fontWeight(.regular)
             }
+            .sensoryFeedback(.increase, trigger: sendHapticFeedback)
         }
         .onAppear{
             // Agregar las URLs de las imágenes a la lista, comenzando por la más pequeña

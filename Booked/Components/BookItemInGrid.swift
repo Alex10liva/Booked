@@ -15,9 +15,9 @@ struct BookItemInGrid: View {
     
     var body: some View {
         VStack (alignment: .leading){
-            if let id = book.id{
-                
-                KFImage(URL(string: "https://books.google.com/books/publisher/content/images/frontcover/\(id)?fife=w1200&source=gbs_api"))
+            
+            if let extraLarge = book.imageLinks?.extraLarge{
+                KFImage(URL(string: extraLarge))
                     .onSuccess{ result in
                         withAnimation(.spring(response: 0.5, dampingFraction: 0.6)){
                             imageLoaded = true
@@ -29,7 +29,7 @@ struct BookItemInGrid: View {
                     .placeholder { progress in
                         Rectangle()
                             .fill(.primary.opacity(0.5))
-                            .frame(width: 167, height: 250)
+                            .frame(width: 170, height: 255)
                             .clipShape(RoundedRectangle(cornerRadius: 5))
                             .overlay{
                                 ProgressView()
@@ -39,14 +39,47 @@ struct BookItemInGrid: View {
                     }
                     .fade(duration: 0.5)
                     .resizable()
-                    .scaledToFit()
-                    .frame(width: 167)
-                    .frame(maxHeight: 250)
+                    .scaledToFill()
+                    .frame(width: 170)
+                    .frame(maxHeight: 255)
                     .clipShape(RoundedRectangle(cornerRadius: 5))
                     .overlay(
                         RoundedRectangle(cornerRadius: 5)
                             .stroke(.primary.opacity(0.3), lineWidth: 0.5)
                     )
+            } else {
+                if let id = book.id{
+                    KFImage(URL(string: "https://books.google.com/books/publisher/content/images/frontcover/\(id)?fife=w1200&source=gbs_api"))
+                        .onSuccess{ result in
+                            withAnimation(.spring(response: 0.5, dampingFraction: 0.6)){
+                                imageLoaded = true
+                            }
+                        }
+                        .onFailure { error in
+                            print("Error loading image: \(error.localizedDescription)")
+                        }
+                        .placeholder { progress in
+                            Rectangle()
+                                .fill(.primary.opacity(0.5))
+                                .frame(width: 170, height: 255)
+                                .clipShape(RoundedRectangle(cornerRadius: 5))
+                                .overlay{
+                                    ProgressView()
+                                        .progressViewStyle(.circular)
+                                }
+                            
+                        }
+                        .fade(duration: 0.5)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 170)
+                        .frame(maxHeight: 255)
+                        .clipShape(RoundedRectangle(cornerRadius: 5))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 5)
+                                .stroke(.primary.opacity(0.3), lineWidth: 0.5)
+                        )
+                }
             }
             
             if let title = book.title{
