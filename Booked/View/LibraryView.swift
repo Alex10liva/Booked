@@ -13,17 +13,18 @@ struct LibraryView: View {
     @Environment(\.colorScheme) var colorScheme
     @State private var selectedTab: Tab? = .readingList
     @State private var tabProgress: CGFloat = 0
+    @State private var addToListName: String = ""
     
     var body: some View {
         NavigationStack{
             
-            ZStack(alignment: .bottom){
-                
+            ZStack(alignment: .top){
                 GeometryReader{ geo in
                     
                     let size = geo.size
                     
                     ScrollView(.horizontal){
+                        
                         LazyHStack(spacing: 0){
                             ReadingListView()
                                 .id(Tab.readingList)
@@ -44,44 +45,102 @@ struct LibraryView: View {
                     .scrollTargetBehavior(.paging)
                 }
                 
-                CustomTabBar(selectedTab: $selectedTab, tabProgress: $tabProgress)
-                    .padding()
-            }
-            .toolbar{
-                ToolbarItem(placement: .topBarLeading){
-                    Text(selectedTab == .readingList ? "Reading List" : "Finished Books")
-                        .font(.title)
-                        .bold()
+                VStack{
+                    CustomTabBar(selectedTab: $selectedTab, tabProgress: $tabProgress)
+                        .padding(.top, 10)
+                        .padding(.bottom, 55)
+                        .background(
+                            Rectangle()
+                            
+                                .fill(.thinMaterial)
+                            
+                                .mask {
+                                    VStack(spacing: 0) {
+                                        Rectangle()
+                                        LinearGradient(
+                                            colors: [
+                                                Color.black.opacity(1),
+                                                Color.black.opacity(0),
+                                            ],
+                                            startPoint: .top,
+                                            endPoint: .bottom
+                                        )
+                                    }
+                                }
+                                .ignoresSafeArea()
+                        )
+                    Spacer()
+                    Divider()
                 }
                 
+            }
+            .navigationTitle("Library")
+            .toolbarTitleDisplayMode(.inline)
+            
+            .toolbar{
+                
                 ToolbarItem(placement: .topBarTrailing){
-                    
-                    HStack{
+                    Menu {
+                        Button{
+                            if self.selectedTab != .readingList {
+                                withAnimation {
+                                    self.selectedTab = .readingList
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                    self.isAddSheetDisplayed.toggle()
+                                }
+                            } else {
+                                self.isAddSheetDisplayed.toggle()
+                            }
+                        } label: {
+                            Image(systemName: "bookmark.fill")
+                            Text("Add to reading list")
+                        }
+                        
+                        Button{
+                            if self.selectedTab != .finishedBooks {
+                                withAnimation {
+                                    self.selectedTab = .finishedBooks
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                    self.isAddSheetDisplayed.toggle()
+                                }
+                            } else {
+                                self.isAddSheetDisplayed.toggle()
+                            }
+                        } label: {
+                            Image(systemName: "checkmark")
+                            Text("Add to finished books")
+                        }
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .bold()
+                    .foregroundStyle(Color.accent)
+                    .sheet(isPresented: $isAddSheetDisplayed){
+                        SearchView(list: selectedTab == .readingList ? "readingList" : "finishedList")
+                    }
+                }
+                
+                ToolbarItem(placement: .topBarLeading){
+                    Menu{
                         Button{
                             print("Pressed filter")
                         } label: {
                             Image(systemName: "arrow.up.arrow.down")
                                 .font(.callout)
                         }
-                        .foregroundStyle(Color.accent)
                         
-                        Button{
-                            isAddSheetDisplayed.toggle()
-                        } label: {
-                            Image(systemName: "plus")
-                                .font(.headline)
-                        }
-                        .foregroundStyle(Color.accent)
-                        .sheet(isPresented: $isAddSheetDisplayed){
-                            SearchView(list: selectedTab == .readingList ? "readingList" : "finishedList")
-                        }
+                    } label: {
+                        Image(systemName: "arrow.up.arrow.down")
                     }
-                    
                     .bold()
+                    .foregroundStyle(Color.accent)
                 }
+                
+                
             }
         }
-        
     }
 }
 
