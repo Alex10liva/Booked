@@ -20,8 +20,9 @@ struct CustomTabBar: View {
                     Image(systemName: tab.systemImage)
                     
                     Text(tab.rawValue)
-                        .font(.callout)
+                        .font(.footnote)
                 }
+                .bold()
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 10)
                 .contentShape(.capsule)
@@ -30,6 +31,7 @@ struct CustomTabBar: View {
                         selectedTab = tab
                     }
                 }
+                .sensoryFeedback(.increase, trigger: selectedTab)
             }
         }
         .tabMask(tabProgress)
@@ -39,12 +41,13 @@ struct CustomTabBar: View {
                 let capsuleWidth = size.width / CGFloat(Tab.allCases.count)
                 
                 Capsule()
-                    .fill(colorScheme == .light ? .white : .black)
+                    .fill(Color.secondary)
                     .frame(width: capsuleWidth)
                     .offset(x: tabProgress * (size.width - capsuleWidth))
             }
         }
-        .background(.gray.opacity(0.1), in: .capsule)
+        .padding(5)
+        .background(.thinMaterial, in: .capsule)
         .padding(.horizontal)
     }
 }
