@@ -6,8 +6,11 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct SearchView: View {
+    
+    @Query private var items: [Book]
     
     // MARK: - ViewModels
     @StateObject var searchViewModel = SearchViewModel()
@@ -21,7 +24,10 @@ struct SearchView: View {
                 LazyVStack(spacing: 15){
                     if searchViewModel.searchTerm != "" {
                         ForEach(searchViewModel.books) { book in
-                            BookItemInSearch(bookLocal: book, list: self.list)
+                            
+                            if !searchByID(with: book){
+                                BookItemInSearch(bookLocal: book, list: self.list)
+                            }
                         }
                     }
                 }
@@ -44,11 +50,17 @@ struct SearchView: View {
             .toolbarTitleDisplayMode(.inline)
             .toolbar{
                 ToolbarItem(placement: .principal){
-                    Text("Select book")
+                    Text(list == "readingList" ? "Add to reading list" : "Add to finished books")
                         .bold()
                 }
             }
         }
+    }
+    
+    func searchByID(with bookSearched: BookLocal) -> Bool{
+        return (items.first { book in
+            book.id == bookSearched.id
+        } != nil)
     }
 }
 
