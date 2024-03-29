@@ -11,7 +11,7 @@ struct LibraryView: View {
     
     @State private var isAddSheetDisplayed: Bool = false
     @Environment(\.colorScheme) var colorScheme
-    @State private var selectedTab: Tab? = .readingList
+    @State var selectedTab: Tab? = .readingList
     @State private var tabProgress: CGFloat = 0
     @State private var addToListName: String = ""
     
@@ -26,11 +26,11 @@ struct LibraryView: View {
                     ScrollView(.horizontal){
                         
                         LazyHStack(spacing: 0){
-                            ReadingListView()
+                            ReadingListView(selectedTab: $selectedTab)
                                 .id(Tab.readingList)
                                 .containerRelativeFrame(.horizontal)
                             
-                            FinishedListView()
+                            FinishedListView(selectedTab: $selectedTab)
                                 .id(Tab.finishedBooks)
                                 .containerRelativeFrame(.horizontal)
                         }
