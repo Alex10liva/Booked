@@ -6,14 +6,20 @@
 //
 
 import SwiftUI
+import SwiftData
 import Kingfisher
 
 struct BookDescriptionView: View {
+    
+    @Environment(\.modelContext) private var modelContext
+    @Query private var items: [Book]
     
     @Environment(\.dismiss) var dismiss
     
     @State var book: Book
     @State private var hideStatusBar: Bool = false
+    @Binding var selectedTab: Tab?
+    @State var showOptions: Bool = false
     
     var body: some View {
         NavigationStack{
@@ -122,7 +128,7 @@ struct BookDescriptionView: View {
                 VStack{
                     
                     HStack{
-                        Spacer()
+                        
                         Button{
                             hideStatusBar.toggle()
                             dismiss()
@@ -134,8 +140,51 @@ struct BookDescriptionView: View {
                                 .background(.regularMaterial)
                                 .clipShape(Circle())
                         }
+                        .padding(.leading)
+                        
+                        Spacer()
+                        
+                        if showOptions {
+                            Menu {
+                                Button {
+                                    dismiss()
+                                        
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3){
+                                        withAnimation{
+                                            selectedTab = selectedTab == .readingList ? .finishedBooks : .readingList
+                                            
+                                            if let bookIndex = items.firstIndex(where: {$0.id == book.id}){
+                                                items[bookIndex].addedDate = Date.now
+                                                items[bookIndex].list = items[bookIndex].list == "finishedList" ? "readingList" : "finishedList"
+                                            }
+                                        }
+                                    }
+                                } label: {
+                                    Label("Move to \(selectedTab == .readingList ? "finished books" : "reading list")", systemImage: selectedTab == .readingList ? "arrow.right" : "arrow.left")
+                                }
+                                
+                                Button(role: .destructive) {
+                                    withAnimation{
+                                        dismiss()
+                                        if let bookIndex = items.firstIndex(where: {$0.id == book.id}){
+                                            modelContext.delete(items[bookIndex])
+                                        }
+                                    }
+                                } label: {
+                                    Label("Remove book", systemImage: "trash")
+                                }
+                            } label: {
+                                Image(systemName: "ellipsis.circle.fill")
+                                    .font(.title)
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.primary, .clear)
+                                    .background(.regularMaterial)
+                                    .clipShape(Circle())
+                            }
+                            .padding(.trailing)
+                        }
                     }
-                    .padding(.trailing)
+                    
                     
                     Spacer()
                     
@@ -167,5 +216,5 @@ struct BookDescriptionView: View {
 }
 
 #Preview {
-    BookDescriptionView(book: Book(id: Optional("2zgRDXFWkm8C"), title: Optional("Harry Potter y la piedra filosofal"), authors: Optional(["J.K. Rowling"]), publisher: Optional("Pottermore Publishing"), publishedDate: Optional("2015-12-08"), descriptionStored: Optional("Con las manos temblorosas, Harry le dio la vuelta al sobre y vio un sello de lacre púrpura con un escudo de armas: un león, un águila, un tejón y una serpiente, que rodeaban una gran letra H. Harry Potter nunca había oído nada sobre Hogwarts cuando las cartas comienzan a caer en el felpudo del número cuatro de Privet Drive. Escritas en tinta verde en un pergamino amarillento con un sello morado, sus horribles tíos las han confiscado velozmente. En su undécimo cumpleaños, un hombre gigante de ojos negros llamado Rubeus Hagrid aparece con una noticia extraordinaria: Harry Potter es un mago y tiene una plaza en el Colegio Hogwarts de Magia y Hechicería. ¡Una aventura increíble está a punto de empezar! Tema musical compuesto por James Hannigan."), imageLinks: Optional(Booked.ImageLinks(smallThumbnail: Optional("http://books.google.com/books/content?id=2zgRDXFWkm8C&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api"), thumbnail: Optional("http://books.google.com/books/content?id=2zgRDXFWkm8C&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"), small: nil, medium: nil, large: nil, extraLarge: nil)), categories: Optional(["Juvenile Fiction"]), averageRating: Optional(4.0), ratingsCount: Optional(124), pageCount: Optional(320), language: Optional("es"), previewLink: Optional("http://books.google.es/books?id=2zgRDXFWkm8C&printsec=frontcover&dq=harry&hl=&cd=2&source=gbs_api"), infoLink: Optional("https://play.google.com/store/books/details?id=2zgRDXFWkm8C&source=gbs_api"), list: "", addedDate: Date.now))
+    BookDescriptionView(book: Book(id: Optional("2zgRDXFWkm8C"), title: Optional("Harry Potter y la piedra filosofal"), authors: Optional(["J.K. Rowling"]), publisher: Optional("Pottermore Publishing"), publishedDate: Optional("2015-12-08"), descriptionStored: Optional("Con las manos temblorosas, Harry le dio la vuelta al sobre y vio un sello de lacre púrpura con un escudo de armas: un león, un águila, un tejón y una serpiente, que rodeaban una gran letra H. Harry Potter nunca había oído nada sobre Hogwarts cuando las cartas comienzan a caer en el felpudo del número cuatro de Privet Drive. Escritas en tinta verde en un pergamino amarillento con un sello morado, sus horribles tíos las han confiscado velozmente. En su undécimo cumpleaños, un hombre gigante de ojos negros llamado Rubeus Hagrid aparece con una noticia extraordinaria: Harry Potter es un mago y tiene una plaza en el Colegio Hogwarts de Magia y Hechicería. ¡Una aventura increíble está a punto de empezar! Tema musical compuesto por James Hannigan."), imageLinks: Optional(Booked.ImageLinks(smallThumbnail: Optional("http://books.google.com/books/content?id=2zgRDXFWkm8C&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api"), thumbnail: Optional("http://books.google.com/books/content?id=2zgRDXFWkm8C&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"), small: nil, medium: nil, large: nil, extraLarge: nil)), categories: Optional(["Juvenile Fiction"]), averageRating: Optional(4.0), ratingsCount: Optional(124), pageCount: Optional(320), language: Optional("es"), previewLink: Optional("http://books.google.es/books?id=2zgRDXFWkm8C&printsec=frontcover&dq=harry&hl=&cd=2&source=gbs_api"), infoLink: Optional("https://play.google.com/store/books/details?id=2zgRDXFWkm8C&source=gbs_api"), list: "", addedDate: Date.now), selectedTab: .constant(.finishedBooks))
 }

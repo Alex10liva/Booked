@@ -23,7 +23,7 @@ struct FinishedListView: View {
             ScrollView(.vertical){
                 
                 Spacer()
-                    .frame(height: 50)
+                    .frame(height: 60)
                 
                 LazyVGrid(columns: Array(repeating: GridItem(), count: 2), spacing: 15){
                     
@@ -33,7 +33,7 @@ struct FinishedListView: View {
                             .onTapGesture {
                                 selectedBookViewModel.selectedBook = book
                             }
-                            .padding()
+                            .padding(5)
                             .contextMenu {
                                 Button {
                                     withAnimation{
@@ -69,7 +69,7 @@ struct FinishedListView: View {
                 }
             }
             .fullScreenCover(item: $selectedBookViewModel.selectedBook){ fullScreenBook in
-                BookDescriptionView(book: fullScreenBook)
+                BookDescriptionView(book: fullScreenBook, selectedTab: $selectedTab, showOptions: true)
             }
         }
         

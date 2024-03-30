@@ -98,7 +98,6 @@ struct SingleBookCard: View {
                 }
                 
                 if let authors = bookInfo.authors {
-                    let _ = print("authors:  \(authors.isEmpty)")
                     Text(concatAuthors(for: authors))
                         .font(.title3)
                         .foregroundStyle(.secondary)
@@ -115,7 +114,8 @@ struct SingleBookCard: View {
             }
         }
         .fullScreenCover(isPresented: $isBookDescriptionDisplayed){
-            BookDescriptionView(book: bookInfo)
+            BookDescriptionView(book: bookInfo, selectedTab: .constant(.readingList), showOptions: false)
+            
         }
     }
     
