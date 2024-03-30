@@ -48,6 +48,10 @@ struct CustomTabBar: View {
         }
         .padding(5)
         .background(.thinMaterial, in: .capsule)
+        .overlay{
+            Capsule()
+                .stroke(.primary.opacity(0.1), lineWidth: 0.5)
+        }
         .padding(.horizontal)
     }
 }
