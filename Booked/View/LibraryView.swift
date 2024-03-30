@@ -48,12 +48,18 @@ struct LibraryView: View {
                 VStack{
                     CustomTabBar(selectedTab: $selectedTab, tabProgress: $tabProgress)
                         .padding(.top, 10)
-                        .padding(.bottom, 55)
+                        .padding(.bottom, 40)
                         .background(
                             Rectangle()
-                            
+                                .fill(
+                                    Color(
+                                        red: 0.0,  // Componente rojo (constante en este caso)
+                                        green: (1 - tabProgress) * 1.0 + tabProgress * 1.0,  // Componente verde
+                                        blue: (1 - tabProgress) * 1.0 + tabProgress * 0.0  // Componente azul
+                                    )
+                                    .opacity(0.3)
+                                )
                                 .fill(.thinMaterial)
-                            
                                 .mask {
                                     VStack(spacing: 0) {
                                         Rectangle()
@@ -67,8 +73,27 @@ struct LibraryView: View {
                                         )
                                     }
                                 }
+                                .overlay{
+                                    Image("grain") // Asegúrate de tener una imagen de ruido llamada "grain" en tu proyecto
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .opacity(0.2) // Ajusta la opacidad según tus preferencias
+                                        .overlay{
+                                            colorScheme == .light ? Color.white.opacity(0.5) : Color.black.opacity(0.5)
+                                        }
+                                        .mask(
+                                            LinearGradient(
+                                                gradient: Gradient(colors: [.black.opacity(0.7), .black.opacity(0)]),
+                                                startPoint: .top,
+                                                endPoint: .bottom
+                                            )
+                                        )
+                                        .ignoresSafeArea()
+                                }
                                 .ignoresSafeArea()
+                            
                         )
+                    
                     Spacer()
                     Divider()
                 }
@@ -78,7 +103,6 @@ struct LibraryView: View {
             .toolbarTitleDisplayMode(.inline)
             
             .toolbar{
-                
                 ToolbarItem(placement: .topBarTrailing){
                     Menu {
                         Button{
