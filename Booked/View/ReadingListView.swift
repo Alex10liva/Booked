@@ -8,6 +8,11 @@
 import SwiftUI
 import SwiftData
 
+struct BookDetails: Identifiable {
+    var id: String
+    let title: String
+}
+
 struct ReadingListView: View {
     
     @Environment(\.modelContext) private var modelContext
@@ -17,6 +22,8 @@ struct ReadingListView: View {
     
     @StateObject private var selectedBookViewModel = SelectedBookVieModel()
     @Binding var selectedTab: Tab?
+    @State private var isConfirming = false
+    @State private var dialogDetail: BookDetails?
     
     var body: some View {
         NavigationStack{
@@ -49,13 +56,30 @@ struct ReadingListView: View {
                                 }
                                 
                                 Button(role: .destructive) {
-                                    withAnimation{
-                                        if let bookIndex = items.firstIndex(where: {$0.id == book.id}){
+                                    if let id = book.id, let title = book.title {
+                                        dialogDetail = BookDetails(id: id, title: title)
+                                    }
+                                    isConfirming = true
+                                } label: {
+                                    Label("Remove book", systemImage: "trash")
+                                }
+                            }
+                            .confirmationDialog(
+                                "Are you sure you want to delete this book?",
+                                isPresented: $isConfirming, titleVisibility: .visible, presenting: dialogDetail
+                            ) { detail in
+                                Button(role: .destructive) {
+                                    if let bookIndex = items.firstIndex(where: {$0.id == detail.id}){
+                                        withAnimation{
                                             modelContext.delete(items[bookIndex])
                                         }
                                     }
                                 } label: {
-                                    Label("Remove book", systemImage: "trash")
+                                    Text("Delete \(detail.title)")
+                                }
+                                
+                                Button("Cancel", role: .cancel) {
+                                    dialogDetail = nil
                                 }
                             }
                     }

@@ -48,14 +48,14 @@ struct LibraryView: View {
                 VStack{
                     CustomTabBar(selectedTab: $selectedTab, tabProgress: $tabProgress)
                         .padding(.top, 10)
-                        .padding(.bottom, 40)
+                        .padding(.bottom, 45)
                         .background(
                             Rectangle()
                                 .fill(
                                     Color(
-                                        red: 0.0,  // Componente rojo (constante en este caso)
-                                        green: (1 - tabProgress) * 1.0 + tabProgress * 1.0,  // Componente verde
-                                        blue: (1 - tabProgress) * 1.0 + tabProgress * 0.0  // Componente azul
+                                        red: (1 - tabProgress) * 0.29 + tabProgress * 1.0,  // Componente rojo
+                                        green: (1 - tabProgress) * 0.0 + tabProgress * 0.0,  // Componente verde
+                                        blue: (1 - tabProgress) * 1.0 + tabProgress * 0.55  // Componente azul
                                     )
                                     .opacity(0.3)
                                 )
@@ -79,7 +79,7 @@ struct LibraryView: View {
                                         .aspectRatio(contentMode: .fill)
                                         .opacity(0.2) // Ajusta la opacidad según tus preferencias
                                         .overlay{
-                                            colorScheme == .light ? Color.white.opacity(0.5) : Color.black.opacity(0.5)
+                                            colorScheme == .light ? Color.white.opacity(0.2) : Color.black.opacity(0.5)
                                         }
                                         .mask(
                                             LinearGradient(

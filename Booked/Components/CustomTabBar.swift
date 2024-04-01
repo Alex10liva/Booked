@@ -53,6 +53,7 @@ struct CustomTabBar: View {
                 .stroke(.primary.opacity(0.1), lineWidth: 0.5)
         }
         .padding(.horizontal)
+        .shadow(color: .black.opacity(colorScheme == .light ? 0.13 : 0.0), radius: 25, x: 0, y: 8)
     }
 }
 

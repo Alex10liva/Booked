@@ -20,6 +20,8 @@ struct BookDescriptionView: View {
     @State private var hideStatusBar: Bool = false
     @Binding var selectedTab: Tab?
     @State var showOptions: Bool = false
+    @State private var isConfirming = false
+    @State private var dialogDetail: BookDetails?
     
     var body: some View {
         NavigationStack{
@@ -164,12 +166,11 @@ struct BookDescriptionView: View {
                                 }
                                 
                                 Button(role: .destructive) {
-                                    withAnimation{
-                                        dismiss()
-                                        if let bookIndex = items.firstIndex(where: {$0.id == book.id}){
-                                            modelContext.delete(items[bookIndex])
-                                        }
+                                    if let id = book.id, let title = book.title {
+                                        dialogDetail = BookDetails(id: id, title: title)
                                     }
+                                    isConfirming = true
+                                    
                                 } label: {
                                     Label("Remove book", systemImage: "trash")
                                 }
@@ -182,6 +183,26 @@ struct BookDescriptionView: View {
                                     .clipShape(Circle())
                             }
                             .padding(.trailing)
+                            .confirmationDialog(
+                                "Are you sure you want to delete this book?",
+                                isPresented: $isConfirming, titleVisibility: .visible, presenting: dialogDetail
+                            ) { detail in
+                                Button(role: .destructive) {
+                                    dismiss()
+                                    
+                                    if let bookIndex = items.firstIndex(where: {$0.id == book.id}){
+                                        withAnimation{
+                                            modelContext.delete(items[bookIndex])
+                                        }
+                                    }
+                                } label: {
+                                    Text("Delete \(detail.title)")
+                                }
+                                
+                                Button("Cancel", role: .cancel) {
+                                    dialogDetail = nil
+                                }
+                            }
                         }
                     }
                     
