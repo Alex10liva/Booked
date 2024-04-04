@@ -50,7 +50,7 @@ struct CustomTabBar: View {
         .background(.thinMaterial, in: .capsule)
         .overlay{
             Capsule()
-                .stroke(.primary.opacity(0.1), lineWidth: 0.5)
+                .stroke(.primary.opacity(0.2), lineWidth: 0.5)
         }
         .padding(.horizontal)
         .shadow(color: .black.opacity(colorScheme == .light ? 0.13 : 0.0), radius: 25, x: 0, y: 8)

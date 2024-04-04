@@ -6,14 +6,26 @@
 //
 
 import SwiftUI
+import SwiftData
+
+enum ListOrder{
+    case dateAscending
+    case dateDescending
+    case titleAscending
+    case titleDescending
+    case authorAshending
+    case authorDescending
+}
 
 struct LibraryView: View {
     
     @State private var isAddSheetDisplayed: Bool = false
     @Environment(\.colorScheme) var colorScheme
-    @State var selectedTab: Tab? = .readingList
+    @Binding var selectedTab: Tab?
+    @Binding var tabSelection: Int
     @State private var tabProgress: CGFloat = 0
     @State private var addToListName: String = ""
+    @State var selectedListOrder: ListOrder = .dateDescending
     
     var body: some View {
         NavigationStack{
@@ -26,11 +38,11 @@ struct LibraryView: View {
                     ScrollView(.horizontal){
                         
                         LazyHStack(spacing: 0){
-                            ReadingListView(selectedTab: $selectedTab)
+                            ReadingListView(selectedTab: $selectedTab, tabSelection: $tabSelection, selectedListOrder: $selectedListOrder)
                                 .id(Tab.readingList)
                                 .containerRelativeFrame(.horizontal)
                             
-                            FinishedListView(selectedTab: $selectedTab)
+                            FinishedListView(selectedTab: $selectedTab, tabSelection: $tabSelection, selectedListOrder: $selectedListOrder)
                                 .id(Tab.finishedBooks)
                                 .containerRelativeFrame(.horizontal)
                         }
@@ -53,9 +65,9 @@ struct LibraryView: View {
                             Rectangle()
                                 .fill(
                                     Color(
-                                        red: (1 - tabProgress) * 0.29 + tabProgress * 1.0,  // Componente rojo
-                                        green: (1 - tabProgress) * 0.0 + tabProgress * 0.0,  // Componente verde
-                                        blue: (1 - tabProgress) * 1.0 + tabProgress * 0.55  // Componente azul
+                                        red: (1 - tabProgress) * 0.29 + tabProgress * 1.0,
+                                        green: (1 - tabProgress) * 0.0 + tabProgress * 0.0,
+                                        blue: (1 - tabProgress) * 1.0 + tabProgress * 0.55
                                     )
                                     .opacity(0.3)
                                 )
@@ -74,10 +86,10 @@ struct LibraryView: View {
                                     }
                                 }
                                 .overlay{
-                                    Image("grain") // Asegúrate de tener una imagen de ruido llamada "grain" en tu proyecto
+                                    Image("grain")
                                         .resizable()
                                         .aspectRatio(contentMode: .fill)
-                                        .opacity(0.2) // Ajusta la opacidad según tus preferencias
+                                        .opacity(0.2)
                                         .overlay{
                                             colorScheme == .light ? Color.white.opacity(0.2) : Color.black.opacity(0.5)
                                         }
@@ -103,6 +115,22 @@ struct LibraryView: View {
             .toolbarTitleDisplayMode(.inline)
             
             .toolbar{
+                ToolbarItem(placement: .topBarLeading){
+                    Menu{
+                        Button{
+                            print("Pressed filter")
+                        } label: {
+                            Image(systemName: "arrow.up.arrow.down")
+                                .font(.callout)
+                        }
+                        
+                    } label: {
+                        Image(systemName: "arrow.up.arrow.down")
+                    }
+                    .bold()
+                    .foregroundStyle(Color.accent)
+                }
+                
                 ToolbarItem(placement: .topBarTrailing){
                     Menu {
                         Button{
@@ -145,29 +173,11 @@ struct LibraryView: View {
                         SearchView(list: selectedTab == .readingList ? "readingList" : "finishedList")
                     }
                 }
-                
-                ToolbarItem(placement: .topBarLeading){
-                    Menu{
-                        Button{
-                            print("Pressed filter")
-                        } label: {
-                            Image(systemName: "arrow.up.arrow.down")
-                                .font(.callout)
-                        }
-                        
-                    } label: {
-                        Image(systemName: "arrow.up.arrow.down")
-                    }
-                    .bold()
-                    .foregroundStyle(Color.accent)
-                }
-                
-                
             }
         }
     }
 }
 
 #Preview {
-    LibraryView()
+    LibraryView(selectedTab: .constant(.readingList), tabSelection: .constant(2))
 }

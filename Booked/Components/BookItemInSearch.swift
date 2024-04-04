@@ -12,6 +12,18 @@ import Kingfisher
 struct BookItemInSearch: View {
     
     @Environment(\.modelContext) private var modelContext
+    @Query(filter: #Predicate<Book> { book in
+        book.list == "recommendList"
+    }, sort: \Book.addedDate, order: .reverse) private var recommendedBooks: [Book]
+    
+    @Query(filter: #Predicate<Book> { book in
+        book.list == "finishedList"
+    }, sort: \Book.addedDate, order: .reverse) private var finishedBooks: [Book]
+    
+    @Query(filter: #Predicate<Book> { book in
+        book.list == "readingList"
+    }, sort: \Book.addedDate, order: .reverse) private var readingBooks: [Book]
+    
     @Query private var items: [Book]
     
     @Environment(\.dismiss) var dismiss
@@ -21,10 +33,14 @@ struct BookItemInSearch: View {
     @State var imageURLs: [String] = []
     @State var list: String
     @State var sendHapticFeedback: Bool = false
+    let webService = WebService()
+    @State private var lastXAuthors: [String] = []
+    let defaults = UserDefaults.standard
+    @State var deletedBooksIDs: [String] = []
     
     var body: some View {
         HStack{
-                
+            
             if let extraLarge = bookLocal.imageLinks?.extraLarge{
                 KFImage(URL(string: extraLarge))
                     .onSuccess{ result in
@@ -125,25 +141,7 @@ struct BookItemInSearch: View {
             .sensoryFeedback(.increase, trigger: sendHapticFeedback)
         }
         .onAppear{
-            // Agregar las URLs de las imágenes a la lista, comenzando por la más pequeña
-            if let thumbnail = bookLocal.imageLinks?.thumbnail {
-                self.imageURLs.append(convertToSecureURL(urlString: thumbnail))
-            }
-            if let smallThumbnail = bookLocal.imageLinks?.smallThumbnail {
-                self.imageURLs.append(convertToSecureURL(urlString: smallThumbnail))
-            }
-            if let small = bookLocal.imageLinks?.small {
-                self.imageURLs.append(convertToSecureURL(urlString: small))
-            }
-            if let medium = bookLocal.imageLinks?.medium {
-                self.imageURLs.append(convertToSecureURL(urlString: medium))
-            }
-            if let large = bookLocal.imageLinks?.large {
-                self.imageURLs.append(convertToSecureURL(urlString: large))
-            }
-            if let extraLarge = bookLocal.imageLinks?.extraLarge {
-                self.imageURLs.append(convertToSecureURL(urlString: extraLarge))
-            }
+            deletedBooksIDs = (defaults.array(forKey: "deletedIDs") ?? []) as? [String] ?? [""]
         }
     }
     
@@ -154,6 +152,40 @@ struct BookItemInSearch: View {
         withAnimation {
             let newItem = bookToSave
             modelContext.insert(newItem)
+        }
+        
+        if self.list == "finishedList" {
+            
+            do {
+                try modelContext.delete(
+                    model: Book.self,
+                    where: #Predicate { item in
+                        item.list == "recommendList"
+                    }
+                )
+            } catch {
+                print("Error al eliminar libros recomendados existentes: \(error)")
+            }
+            
+            // Obtener todos los autores presentes en la lista finishedBooks
+            let authorsQuery = finishedBooks.flatMap { $0.authors ?? [] }
+            
+            // Obtener los últimos X autores
+            let lastXAuthorsCount = 5 // Cambia esto al número deseado
+            getLastXAuthors(from: authorsQuery, count: lastXAuthorsCount)
+            
+            // Realizar una solicitud para cada uno de los últimos X autores y obtener los libros más relevantes
+            for author in lastXAuthors {
+                let query = "https://www.googleapis.com/books/v1/volumes?q=inauthor:\(author)&orderBy=relevance&maxResults=10"
+                Task {
+                    guard let bookResponse: BookResponse = await webService.downloadData(fromURL: query) else {
+                        print("No se pudo obtener una respuesta de la API de Google Books.")
+                        return
+                    }
+                    
+                    handleBookResponse(bookResponse: bookResponse)
+                }
+            }
         }
     }
     
@@ -180,8 +212,115 @@ struct BookItemInSearch: View {
             return urlString
         }
     }
+    
+    // Función para obtener los últimos X autores
+    func getLastXAuthors(from authors: [String], count: Int) {
+        // Verificar si hay suficientes autores en la lista
+        guard authors.count >= count else {
+            lastXAuthors = authors
+            return
+        }
+        
+        // Seleccionar los últimos X autores
+        let startIndex = authors.count - count
+        let endIndex = authors.count
+        lastXAuthors = Array(authors[startIndex..<endIndex])
+    }
+    
+    // Función para obtener keypoints de libros leídos
+    func getBookKeyPoints(from books: [Book]) -> [String: Any] {
+        var keyPoints: [String: Any] = [:]
+        
+        // Recopilar información de libros leídos
+        var genres: [String] = []
+        var authors: [String] = []
+        var keywords: [String] = []
+        
+        for book in books {
+            if let bookGenres = book.categories {
+                genres.append(contentsOf: bookGenres)
+            }
+            if let bookAuthors = book.authors {
+                authors.append(contentsOf: bookAuthors)
+            }
+            if let bookTitle = book.title {
+                keywords.append(bookTitle)
+            }
+        }
+        
+        // Eliminar duplicados y preparar para consulta
+        keyPoints["genres"] = Array(Set(genres))
+        keyPoints["authors"] = Array(Set(authors))
+        
+        return keyPoints
+    }
+    
+    func handleBookResponse(bookResponse: BookResponse) {
+        DispatchQueue.main.async {
+            
+            // Agregar todos los libros de la respuesta a una lista temporal
+            bookResponse.items.forEach { item in
+                let id = item.id
+                let title = item.volumeInfo.title
+                let authors = item.volumeInfo.authors
+                let publisher = item.volumeInfo.publisher
+                let publishedDate = item.volumeInfo.publishedDate
+                let description = item.volumeInfo.description
+                let imageLinks = item.volumeInfo.imageLinks
+                let categories = item.volumeInfo.categories
+                let averageRating = item.volumeInfo.averageRating
+                let ratingsCount = item.volumeInfo.ratingsCount
+                let pageCount = item.volumeInfo.pageCount
+                let language = item.volumeInfo.language
+                let previewLink = item.volumeInfo.previewLink
+                let infoLink = item.volumeInfo.infoLink
+                
+                // Verificar si alguna propiedad opcional es nula, si lo es, retornar nil para descartar el elemento
+                guard let id = id, let title = title, let authors = authors, let publisher = publisher, let publishedDate = publishedDate, let description = description, let imageLinks = imageLinks else { return }
+                
+                if deletedBooksIDs.contains(where: {$0 == id }){
+                    print("El libro se borro con anterioridad")
+                    return
+                }
+                
+                // Verificar si el libro ya existe en el arreglo
+                if recommendedBooks.contains(where: { $0.id == id }) {
+                    // El libro ya existe, no lo agregamos nuevamente
+                    print("El libro con ID \(id) ya está en la lista de recomendaciones.")
+                    return
+                }
+                
+                if readingBooks.contains(where: {$0.id == id}) || finishedBooks.contains(where: ({$0.id == id})){
+                    print("El libro con ID \(id) ya esta agregado")
+                    return
+                }
+                
+                // Insertar el nuevo libro en la lista temporal
+                let newBook = Book(
+                    id: id,
+                    title: title,
+                    authors: authors,
+                    publisher: publisher,
+                    publishedDate: publishedDate,
+                    descriptionStored: description,
+                    imageLinks: imageLinks,
+                    categories: categories,
+                    averageRating: averageRating,
+                    ratingsCount: ratingsCount,
+                    pageCount: pageCount,
+                    language: language,
+                    previewLink: previewLink,
+                    infoLink: infoLink,
+                    list: "recommendList", // Usar una lista temporal para evitar conflictos
+                    addedDate: Date.now
+                )
+                modelContext.insert(newBook)
+            }
+        }
+    }
 }
 
 #Preview {
     BookItemInSearch(bookLocal: BookLocal(id: "", title: "", authors: [""], publisher: "", publishedDate: "", descriptionStored: "", imageLinks: nil, categories: [""], averageRating: 0.0, ratingsCount: 10, pageCount: 10, language: "", previewLink: "", infoLink: ""), list: "finishedBook")
 }
+

@@ -59,7 +59,7 @@ struct SearchView: View {
     
     func searchByID(with bookSearched: BookLocal) -> Bool{
         return (items.first { book in
-            book.id == bookSearched.id
+            book.id == bookSearched.id && book.list != "recommendList"
         } != nil)
     }
 }

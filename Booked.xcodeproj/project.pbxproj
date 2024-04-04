@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		446503B12BBCA7CD009F2788 /* ViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446503B02BBCA7CD009F2788 /* ViewExtensions.swift */; };
 		446622272BB2074300C31DA3 /* FinishedListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446622262BB2074300C31DA3 /* FinishedListView.swift */; };
 		446BB0EE2BB6C9DD00AD075E /* SelectedBookVieModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446BB0ED2BB6C9DD00AD075E /* SelectedBookVieModel.swift */; };
 		446FA3BD2BB54D2300484C3C /* BookDescriptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 446FA3BC2BB54D2300484C3C /* BookDescriptionView.swift */; };
@@ -33,6 +34,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		446503B02BBCA7CD009F2788 /* ViewExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewExtensions.swift; sourceTree = "<group>"; };
 		446622262BB2074300C31DA3 /* FinishedListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinishedListView.swift; sourceTree = "<group>"; };
 		446BB0ED2BB6C9DD00AD075E /* SelectedBookVieModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectedBookVieModel.swift; sourceTree = "<group>"; };
 		446FA3BC2BB54D2300484C3C /* BookDescriptionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookDescriptionView.swift; sourceTree = "<group>"; };
@@ -141,6 +143,7 @@
 			isa = PBXGroup;
 			children = (
 				447D57322BB1EF7E0075BAB3 /* ColorExtensions.swift */,
+				446503B02BBCA7CD009F2788 /* ViewExtensions.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -256,6 +259,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				447D573D2BB1F1690075BAB3 /* BookItemInSearch.swift in Sources */,
+				446503B12BBCA7CD009F2788 /* ViewExtensions.swift in Sources */,
 				447D571C2BB1E8E00075BAB3 /* ContentView.swift in Sources */,
 				446BB0EE2BB6C9DD00AD075E /* SelectedBookVieModel.swift in Sources */,
 				447D57462BB1F2130075BAB3 /* WebService.swift in Sources */,

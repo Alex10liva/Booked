@@ -45,7 +45,7 @@ final class SearchViewModel: ObservableObject{
         
         isLoading = true
         let formattedSearchTerm = searchTerm.replacingOccurrences(of: " ", with: "+")
-        let url = "https://www.googleapis.com/books/v1/volumes?q=\(formattedSearchTerm)&maxResults=25"
+        let url = "https://www.googleapis.com/books/v1/volumes?q=\(formattedSearchTerm)printType=books&maxResults=25"
         
         
         Task{

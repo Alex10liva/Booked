@@ -12,16 +12,26 @@ import Kingfisher
 struct BookDescriptionView: View {
     
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Book]
+    @Query private var books: [Book]
     
     @Environment(\.dismiss) var dismiss
+    @Environment(\.colorScheme) var colorScheme
     
     @State var book: Book
     @State private var hideStatusBar: Bool = false
     @Binding var selectedTab: Tab?
+    @Binding var tabSelection: Int
     @State var showOptions: Bool = false
     @State private var isConfirming = false
     @State private var dialogDetail: BookDetails?
+    
+    @State private var scrollPosition: CGPoint = .zero
+    @State private var isActionButtonVisible = false
+    @State private var showActionButtonAtStart = false
+    @State private var buttonOffset = CGSize(width: 0, height: UIScreen.main.bounds.height)
+    @State var showActionButton: Bool
+    let defaults = UserDefaults.standard
+    @State var deletedBooksIDs: [String] = []
     
     var body: some View {
         NavigationStack{
@@ -30,7 +40,7 @@ struct BookDescriptionView: View {
                     
                     Spacer(minLength: 30)
                     
-                    LazyVStack{
+                    VStack{
                         
                         VStack{
                             if let extraLarge = book.imageLinks?.extraLarge{
@@ -55,7 +65,7 @@ struct BookDescriptionView: View {
                                             .stroke(.primary.opacity(0.3), lineWidth: 2)
                                     )
                                     .clipShape(RoundedRectangle(cornerRadius: 10))
-//                                    .padding(.horizontal)
+                                //                                    .padding(.horizontal)
                                     .shadow(color: .black.opacity(0.13), radius: 25, x: 0.0, y: 8.0)
                                 
                                 
@@ -87,7 +97,7 @@ struct BookDescriptionView: View {
                                                 .stroke(.primary.opacity(0.3), lineWidth: 2)
                                         )
                                         .clipShape(RoundedRectangle(cornerRadius: 10))
-//                                        .padding(.horizontal)
+                                    //                                        .padding(.horizontal)
                                         .shadow(color: .black.opacity(0.13), radius: 25, x: 0.0, y: 8.0)
                                 }
                             }
@@ -118,14 +128,31 @@ struct BookDescriptionView: View {
                             Text(descriptionStored)
                                 .lineSpacing(4)
                                 .kerning(0.5)
-//                                .minimumScaleFactor(0.5)
+                            //                                .minimumScaleFactor(0.5)
                         }
                     }
                     .padding()
+                    .background(GeometryReader { geometry in
+                        Color.clear
+                            .preference(key: ScrollOffsetPreferenceKey.self, value: geometry.frame(in: .named("scroll")).origin)
+                            .onAppear{
+                                if geometry.size.height < 600 {
+                                    self.isActionButtonVisible = true
+                                    self.showActionButtonAtStart = true
+                                }
+                            }
+                    })
+                    .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+                        self.scrollPosition = value
+                        
+                        if defaults.bool(forKey: "buttonAppeared") == false {
+                            self.isActionButtonVisible = value.y < -50
+                        }
+                    }
                     
                     Spacer(minLength: 60)
                 }
-                
+                .coordinateSpace(name: "scroll")
                 
                 VStack{
                     
@@ -138,8 +165,7 @@ struct BookDescriptionView: View {
                             Image(systemName: "xmark.circle.fill")
                                 .font(.title)
                                 .symbolRenderingMode(.palette)
-                                .foregroundStyle(.primary, .clear)
-                                .background(.regularMaterial)
+                                .foregroundStyle(.ultraThickMaterial, colorScheme == .light ? Color(hex: "#474747") : Color(hex: "#D8D8D8"))
                                 .clipShape(Circle())
                         }
                         .padding(.leading)
@@ -150,14 +176,14 @@ struct BookDescriptionView: View {
                             Menu {
                                 Button {
                                     dismiss()
-                                        
+                                    
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3){
                                         withAnimation{
                                             selectedTab = selectedTab == .readingList ? .finishedBooks : .readingList
                                             
-                                            if let bookIndex = items.firstIndex(where: {$0.id == book.id}){
-                                                items[bookIndex].addedDate = Date.now
-                                                items[bookIndex].list = items[bookIndex].list == "finishedList" ? "readingList" : "finishedList"
+                                            if let bookIndex = books.firstIndex(where: {$0.id == book.id}){
+                                                books[bookIndex].addedDate = Date.now
+                                                books[bookIndex].list = books[bookIndex].list == "finishedList" ? "readingList" : "finishedList"
                                             }
                                         }
                                     }
@@ -178,8 +204,7 @@ struct BookDescriptionView: View {
                                 Image(systemName: "ellipsis.circle.fill")
                                     .font(.title)
                                     .symbolRenderingMode(.palette)
-                                    .foregroundStyle(.primary, .clear)
-                                    .background(.regularMaterial)
+                                    .foregroundStyle(.ultraThickMaterial, colorScheme == .light ? Color(hex: "#474747") : Color(hex: "#D8D8D8"))
                                     .clipShape(Circle())
                             }
                             .padding(.trailing)
@@ -190,9 +215,14 @@ struct BookDescriptionView: View {
                                 Button(role: .destructive) {
                                     dismiss()
                                     
-                                    if let bookIndex = items.firstIndex(where: {$0.id == book.id}){
+                                    if let bookId = book.id {
+                                        deletedBooksIDs.append(bookId)
+                                        defaults.set(deletedBooksIDs, forKey: "deletedIDs")
+                                    }
+                                    
+                                    if let bookIndex = books.firstIndex(where: {$0.id == book.id}){
                                         withAnimation{
-                                            modelContext.delete(items[bookIndex])
+                                            modelContext.delete(books[bookIndex])
                                         }
                                     }
                                 } label: {
@@ -209,8 +239,36 @@ struct BookDescriptionView: View {
                     
                     Spacer()
                     
-                    ActionButton(icon: "bookmark", label: "Add to reading list"){
-                        print("Action button")
+                    if isActionButtonVisible && showActionButton{
+                        Menu {
+                            
+                            Button{
+                                addItem(with: book, listToSave: "finishedList")
+                            } label: {
+                                Label("Finished books", systemImage: "checkmark")
+                            }
+                            
+                            Button{
+                                addItem(with: book, listToSave: "readingList")
+                            } label: {
+                                Label("Reading list", systemImage: "bookmark")
+                            }
+                            
+                        } label: {
+                            ActionButton(icon: "plus", label: "Add to my library", isInBookDescription: true)
+                        }
+                        .offset(y: buttonOffset.height)
+                        .onAppear{
+                            defaults.set(true, forKey: "buttonAppeared")
+                            
+                            if showActionButtonAtStart {
+                                buttonOffset = CGSize(width: 0, height: 0)
+                            } else {
+                                withAnimation(.bouncy(duration: 0.5).delay(0.2)) {
+                                    buttonOffset = CGSize(width: 0, height: 0)
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -219,6 +277,10 @@ struct BookDescriptionView: View {
                     hideStatusBar.toggle()
                 }
             }
+        }
+        .onAppear{
+            defaults.set(false, forKey: "buttonAppeared")
+            deletedBooksIDs = (defaults.array(forKey: "deletedIDs") ?? []) as? [String] ?? [""]
         }
         .statusBar(hidden: hideStatusBar)
     }
@@ -234,8 +296,27 @@ struct BookDescriptionView: View {
             return "\(allButLast) & \(last ?? "")"
         }
     }
+    
+    private func addItem(with book: Book, listToSave: String) {
+        withAnimation{
+            
+            dismiss()
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                if let bookIndex = books.firstIndex(where: {$0.id == book.id}){
+                    books[bookIndex].addedDate = Date.now
+                    books[bookIndex].list = listToSave
+                }
+                self.tabSelection = 2
+            }
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self.selectedTab = listToSave == "finishedList" ? .finishedBooks : .readingList
+            }
+        }
+    }
 }
 
 #Preview {
-    BookDescriptionView(book: Book(id: Optional("2zgRDXFWkm8C"), title: Optional("Harry Potter y la piedra filosofal"), authors: Optional(["J.K. Rowling"]), publisher: Optional("Pottermore Publishing"), publishedDate: Optional("2015-12-08"), descriptionStored: Optional("Con las manos temblorosas, Harry le dio la vuelta al sobre y vio un sello de lacre púrpura con un escudo de armas: un león, un águila, un tejón y una serpiente, que rodeaban una gran letra H. Harry Potter nunca había oído nada sobre Hogwarts cuando las cartas comienzan a caer en el felpudo del número cuatro de Privet Drive. Escritas en tinta verde en un pergamino amarillento con un sello morado, sus horribles tíos las han confiscado velozmente. En su undécimo cumpleaños, un hombre gigante de ojos negros llamado Rubeus Hagrid aparece con una noticia extraordinaria: Harry Potter es un mago y tiene una plaza en el Colegio Hogwarts de Magia y Hechicería. ¡Una aventura increíble está a punto de empezar! Tema musical compuesto por James Hannigan."), imageLinks: Optional(Booked.ImageLinks(smallThumbnail: Optional("http://books.google.com/books/content?id=2zgRDXFWkm8C&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api"), thumbnail: Optional("http://books.google.com/books/content?id=2zgRDXFWkm8C&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"), small: nil, medium: nil, large: nil, extraLarge: nil)), categories: Optional(["Juvenile Fiction"]), averageRating: Optional(4.0), ratingsCount: Optional(124), pageCount: Optional(320), language: Optional("es"), previewLink: Optional("http://books.google.es/books?id=2zgRDXFWkm8C&printsec=frontcover&dq=harry&hl=&cd=2&source=gbs_api"), infoLink: Optional("https://play.google.com/store/books/details?id=2zgRDXFWkm8C&source=gbs_api"), list: "", addedDate: Date.now), selectedTab: .constant(.finishedBooks))
+    BookDescriptionView(book: Book(id: Optional("2zgRDXFWkm8C"), title: Optional("Harry Potter y la piedra filosofal"), authors: Optional(["J.K. Rowling"]), publisher: Optional("Pottermore Publishing"), publishedDate: Optional("2015-12-08"), descriptionStored: Optional("Con las manos temblorosas, Harry le dio la vuelta al sobre y vio un sello de lacre púrpura con un escudo de armas: un león, un águila, un tejón y una serpiente, que rodeaban una gran letra H. Harry Potter nunca había oído nada sobre Hogwarts cuando las cartas comienzan a caer en el felpudo del número cuatro de Privet Drive. Escritas en tinta verde en un pergamino amarillento con un sello morado, sus horribles tíos las han confiscado velozmente. En su undécimo cumpleaños, un hombre gigante de ojos negros llamado Rubeus Hagrid aparece con una noticia extraordinaria: Harry Potter es un mago y tiene una plaza en el Colegio Hogwarts de Magia y Hechicería. ¡Una aventura increíble está a punto de empezar! Tema musical compuesto por James Hannigan."), imageLinks: Optional(Booked.ImageLinks(smallThumbnail: Optional("http://books.google.com/books/content?id=2zgRDXFWkm8C&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api"), thumbnail: Optional("http://books.google.com/books/content?id=2zgRDXFWkm8C&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"), small: nil, medium: nil, large: nil, extraLarge: nil)), categories: Optional(["Juvenile Fiction"]), averageRating: Optional(4.0), ratingsCount: Optional(124), pageCount: Optional(320), language: Optional("es"), previewLink: Optional("http://books.google.es/books?id=2zgRDXFWkm8C&printsec=frontcover&dq=harry&hl=&cd=2&source=gbs_api"), infoLink: Optional("https://play.google.com/store/books/details?id=2zgRDXFWkm8C&source=gbs_api"), list: "", addedDate: Date.now), selectedTab: .constant(.finishedBooks), tabSelection: .constant(2), showActionButton: true)
 }

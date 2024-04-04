@@ -14,35 +14,31 @@ struct ActionButton: View {
     // MARK: - Enviroment properties
     @Environment(\.colorScheme) var colorScheme
     
-    @State var icon: String
+    @State var icon: String?
     @State var label: String
-    @State var action: (() -> Void)?
+    @State var isInBookDescription: Bool
     
     var body: some View {
         
-        if let receivedAction = action{
-            Button(action: receivedAction){
-                
-                HStack(spacing: 10){
-                    Image(systemName: icon)
-                    
-                    Text(label)
-                        
-                }
+        HStack(spacing: 10){
+            if let icon = icon {
+                Image(systemName: icon)
             }
-            .font(.subheadline)
-            .foregroundStyle(.white)
-            .bold()
-            .padding()
-            .padding(.horizontal)
-            .background(colorScheme == .light ? Color.secondary : Color(hex: "#818181"))
-            .clipShape(Capsule())
+            
+            Text(label)
+                
         }
+        .font(.subheadline)
+        .foregroundStyle(.white)
+        .bold()
+        .padding()
+        .padding(.horizontal)
+        .background(.ultraThinMaterial.opacity(isInBookDescription ? 1.0 : 0.0))
+        .background(colorScheme == .light ? Color(hex: "#848489") : (Color(hex: "#818181")).opacity(isInBookDescription ? 0.0 : 1.0))
+        .clipShape(Capsule())
     }
 }
 
 #Preview {
-    ActionButton(icon: "bookmark", label: "Add to reading list"){
-        print("Hello world")
-    }
+    ActionButton(icon: "bookmark", label: "Add to reading list", isInBookDescription: true)
 }

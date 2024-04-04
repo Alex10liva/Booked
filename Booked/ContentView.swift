@@ -9,18 +9,22 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
+    @State private var tabSelection = 1
+    @State var selectedTab: Tab? = .readingList
     
     var body: some View {
-        TabView{
-            DiscoverView()
+        TabView(selection: $tabSelection){
+            DiscoverView(tabSelection: $tabSelection, selectedTab: $selectedTab)
                 .tabItem {
                     Label("Discover", systemImage: "sparkles")
                 }
+                .tag(1)
             
-            LibraryView()
+            LibraryView(selectedTab: $selectedTab, tabSelection: $tabSelection)
                 .tabItem {
                     Label("Library", systemImage: "books.vertical.fill")
                 }
+                .tag(2)
         }
     }
 }

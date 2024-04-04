@@ -19,6 +19,10 @@ struct FinishedListView: View {
     @Binding var selectedTab: Tab?
     @State private var isConfirming = false
     @State private var dialogDetail: BookDetails?
+    @Binding var tabSelection: Int
+    let defaults = UserDefaults.standard
+    @State var deletedBooksIDs: [String] = []
+    @Binding var selectedListOrder: ListOrder
     
     var body: some View {
         NavigationStack{
@@ -64,6 +68,10 @@ struct FinishedListView: View {
                                 isPresented: $isConfirming, titleVisibility: .visible, presenting: dialogDetail
                             ) { detail in
                                 Button(role: .destructive) {
+                                    
+                                    deletedBooksIDs.append(detail.id)
+                                    defaults.set(deletedBooksIDs, forKey: "deletedIDs")
+                                    
                                     if let bookIndex = items.firstIndex(where: {$0.id == detail.id}){
                                         withAnimation{
                                             modelContext.delete(items[bookIndex])
@@ -88,13 +96,15 @@ struct FinishedListView: View {
                 }
             }
             .fullScreenCover(item: $selectedBookViewModel.selectedBook){ fullScreenBook in
-                BookDescriptionView(book: fullScreenBook, selectedTab: $selectedTab, showOptions: true)
+                BookDescriptionView(book: fullScreenBook, selectedTab: $selectedTab, tabSelection: $tabSelection, showOptions: true, showActionButton: false)
             }
         }
-        
+        .onAppear{
+            deletedBooksIDs = (defaults.array(forKey: "deletedIDs") ?? []) as? [String] ?? [""]
+        }
     }
 }
 
 #Preview {
-    FinishedListView(selectedTab: .constant(.finishedBooks))
+    FinishedListView(selectedTab: .constant(.finishedBooks), tabSelection: .constant(2), selectedListOrder: .constant(.dateAscending))
 }
