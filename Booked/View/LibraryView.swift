@@ -115,22 +115,6 @@ struct LibraryView: View {
             .toolbarTitleDisplayMode(.inline)
             
             .toolbar{
-                ToolbarItem(placement: .topBarLeading){
-                    Menu{
-                        Button{
-                            print("Pressed filter")
-                        } label: {
-                            Image(systemName: "arrow.up.arrow.down")
-                                .font(.callout)
-                        }
-                        
-                    } label: {
-                        Image(systemName: "arrow.up.arrow.down")
-                    }
-                    .bold()
-                    .foregroundStyle(Color.accent)
-                }
-                
                 ToolbarItem(placement: .topBarTrailing){
                     Menu {
                         Button{

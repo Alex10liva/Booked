@@ -167,14 +167,11 @@ struct BookItemInSearch: View {
                 print("Error al eliminar libros recomendados existentes: \(error)")
             }
             
-            // Obtener todos los autores presentes en la lista finishedBooks
             let authorsQuery = finishedBooks.flatMap { $0.authors ?? [] }
             
-            // Obtener los últimos X autores
-            let lastXAuthorsCount = 5 // Cambia esto al número deseado
+            let lastXAuthorsCount = 5
             getLastXAuthors(from: authorsQuery, count: lastXAuthorsCount)
             
-            // Realizar una solicitud para cada uno de los últimos X autores y obtener los libros más relevantes
             for author in lastXAuthors {
                 let query = "https://www.googleapis.com/books/v1/volumes?q=inauthor:\(author)&orderBy=relevance&maxResults=10"
                 Task {
@@ -202,36 +199,28 @@ struct BookItemInSearch: View {
     }
     
     func convertToSecureURL(urlString: String) -> String {
-        // Verificar si la URL comienza con "http://"
         if urlString.hasPrefix("http://") {
-            // Reemplazar "http://" con "https://"
             let secureURLString = urlString.replacingOccurrences(of: "http://", with: "https://")
             return secureURLString
         } else {
-            // Si la URL ya es segura (https://), devolverla sin cambios
             return urlString
         }
     }
     
-    // Función para obtener los últimos X autores
     func getLastXAuthors(from authors: [String], count: Int) {
-        // Verificar si hay suficientes autores en la lista
         guard authors.count >= count else {
             lastXAuthors = authors
             return
         }
         
-        // Seleccionar los últimos X autores
         let startIndex = authors.count - count
         let endIndex = authors.count
         lastXAuthors = Array(authors[startIndex..<endIndex])
     }
     
-    // Función para obtener keypoints de libros leídos
     func getBookKeyPoints(from books: [Book]) -> [String: Any] {
         var keyPoints: [String: Any] = [:]
         
-        // Recopilar información de libros leídos
         var genres: [String] = []
         var authors: [String] = []
         var keywords: [String] = []
@@ -248,7 +237,6 @@ struct BookItemInSearch: View {
             }
         }
         
-        // Eliminar duplicados y preparar para consulta
         keyPoints["genres"] = Array(Set(genres))
         keyPoints["authors"] = Array(Set(authors))
         
@@ -258,7 +246,6 @@ struct BookItemInSearch: View {
     func handleBookResponse(bookResponse: BookResponse) {
         DispatchQueue.main.async {
             
-            // Agregar todos los libros de la respuesta a una lista temporal
             bookResponse.items.forEach { item in
                 let id = item.id
                 let title = item.volumeInfo.title
@@ -275,7 +262,6 @@ struct BookItemInSearch: View {
                 let previewLink = item.volumeInfo.previewLink
                 let infoLink = item.volumeInfo.infoLink
                 
-                // Verificar si alguna propiedad opcional es nula, si lo es, retornar nil para descartar el elemento
                 guard let id = id, let title = title, let authors = authors, let publisher = publisher, let publishedDate = publishedDate, let description = description, let imageLinks = imageLinks else { return }
                 
                 if deletedBooksIDs.contains(where: {$0 == id }){
@@ -283,9 +269,7 @@ struct BookItemInSearch: View {
                     return
                 }
                 
-                // Verificar si el libro ya existe en el arreglo
                 if recommendedBooks.contains(where: { $0.id == id }) {
-                    // El libro ya existe, no lo agregamos nuevamente
                     print("El libro con ID \(id) ya está en la lista de recomendaciones.")
                     return
                 }
@@ -295,7 +279,6 @@ struct BookItemInSearch: View {
                     return
                 }
                 
-                // Insertar el nuevo libro en la lista temporal
                 let newBook = Book(
                     id: id,
                     title: title,
@@ -311,7 +294,7 @@ struct BookItemInSearch: View {
                     language: language,
                     previewLink: previewLink,
                     infoLink: infoLink,
-                    list: "recommendList", // Usar una lista temporal para evitar conflictos
+                    list: "recommendList",
                     addedDate: Date.now
                 )
                 modelContext.insert(newBook)

@@ -65,7 +65,6 @@ struct BookDescriptionView: View {
                                             .stroke(.primary.opacity(0.3), lineWidth: 2)
                                     )
                                     .clipShape(RoundedRectangle(cornerRadius: 10))
-                                //                                    .padding(.horizontal)
                                     .shadow(color: .black.opacity(0.13), radius: 25, x: 0.0, y: 8.0)
                                 
                                 
@@ -97,7 +96,6 @@ struct BookDescriptionView: View {
                                                 .stroke(.primary.opacity(0.3), lineWidth: 2)
                                         )
                                         .clipShape(RoundedRectangle(cornerRadius: 10))
-                                    //                                        .padding(.horizontal)
                                         .shadow(color: .black.opacity(0.13), radius: 25, x: 0.0, y: 8.0)
                                 }
                             }
@@ -128,7 +126,6 @@ struct BookDescriptionView: View {
                             Text(descriptionStored)
                                 .lineSpacing(4)
                                 .kerning(0.5)
-                            //                                .minimumScaleFactor(0.5)
                         }
                     }
                     .padding()

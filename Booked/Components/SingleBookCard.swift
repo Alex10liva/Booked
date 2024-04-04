@@ -95,7 +95,6 @@ struct SingleBookCard: View {
                     Text(title)
                         .font(.title)
                         .bold()
-//                        .padding(.horizontal)
                         .lineLimit(2)
                         .multilineTextAlignment(.center)
                 }

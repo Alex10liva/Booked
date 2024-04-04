@@ -44,7 +44,6 @@ struct SearchView: View {
             }
             .searchable(text: $searchViewModel.searchTerm, placement: .navigationBarDrawer(displayMode: .always))
             .onChange(of: searchViewModel.searchTerm) {
-                // Everytime the user type perform the search
                 searchViewModel.fetchBooks(with: searchViewModel.searchTerm)
             }
             .toolbarTitleDisplayMode(.inline)

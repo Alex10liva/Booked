@@ -110,13 +110,10 @@ struct BookItemInGrid: View {
     }
     
     func convertToSecureURL(urlString: String) -> String {
-        // Verificar si la URL comienza con "http://"
         if urlString.hasPrefix("http://") {
-            // Reemplazar "http://" con "https://"
             let secureURLString = urlString.replacingOccurrences(of: "http://", with: "https://")
             return secureURLString
         } else {
-            // Si la URL ya es segura (https://), devolverla sin cambios
             return urlString
         }
     }

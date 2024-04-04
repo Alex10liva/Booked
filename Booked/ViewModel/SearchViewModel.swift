@@ -74,7 +74,6 @@ final class SearchViewModel: ObservableObject{
                 let previewLink = $0.volumeInfo.previewLink
                 let infoLink = $0.volumeInfo.infoLink
                 
-                // Verificar si alguna propiedad opcional es nula, si lo es, retornar nil para descartar el elemento
                 guard id != nil, title != nil, authors != nil, publisher != nil, publishedDate != nil, description != nil, imageLinks != nil else { return nil }
                 
                 return BookLocal(

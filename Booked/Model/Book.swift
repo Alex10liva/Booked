@@ -56,13 +56,13 @@ struct BookLocal: Identifiable{
     let publishedDate: String?
     let descriptionStored: String?
     let imageLinks: ImageLinks?
-    let categories: [String]? // Categorías del libro
-    let averageRating: Double? // Calificación promedio del libro
-    let ratingsCount: Int? // Número de calificaciones recibidas
-    let pageCount: Int? // Número de páginas del libro
-    let language: String? // Idioma del libro
-    let previewLink: String? // Enlace de vista previa del libro
-    let infoLink: String? // Enlace de información adicional sobre el libro
+    let categories: [String]?
+    let averageRating: Double?
+    let ratingsCount: Int?
+    let pageCount: Int?
+    let language: String?
+    let previewLink: String?
+    let infoLink: String?
 }
 
 // MARK: - Struct to decode the received book from the API
@@ -84,13 +84,13 @@ struct VolumeInfo: Codable {
     let publishedDate: String?
     let description: String?
     let imageLinks: ImageLinks?
-    let categories: [String]? // Categorías del libro
-    let averageRating: Double? // Calificación promedio del libro
-    let ratingsCount: Int? // Número de calificaciones recibidas
-    let pageCount: Int? // Número de páginas del libro
-    let language: String? // Idioma del libro
-    let previewLink: String? // Enlace de vista previa del libro
-    let infoLink: String? // Enlace de información adicional sobre el libro
+    let categories: [String]?
+    let averageRating: Double?
+    let ratingsCount: Int?
+    let pageCount: Int?
+    let language: String?
+    let previewLink: String?
+    let infoLink: String?
 }
 
 // MARK: - Struct of the image links of the book
