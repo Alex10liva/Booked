@@ -98,7 +98,7 @@ struct ReadingListView: View {
             .scrollIndicators(.hidden)
             .overlay{
                 if items.isEmpty{
-                    ContentUnavailableView("You don't have books in your reading list", systemImage: "sparkles", description: Text("Go to the discover page to get some books or tap the + to add books"))
+                    ContentUnavailableView("Looks like your reading list is pretty empty", systemImage: "bookmark.fill", description: Text("Let's fill it up! Head to the discover page to find some great reads, or simply tap the + to add books"))
                 }
             }
             .fullScreenCover(item: $selectedBookViewModel.selectedBook){ fullScreenBook in

@@ -92,7 +92,7 @@ struct FinishedListView: View {
             .scrollIndicators(.hidden)
             .overlay{
                 if items.isEmpty{
-                    ContentUnavailableView("You don't have books listed as finished", systemImage: "checkmark", description: Text("Tap on the + to add some books and get more recommendations"))
+                    ContentUnavailableView("Your finished books shelf is feeling a bit lonely", systemImage: "checkmark", description: Text("Why not add some books? Tap the + symbol to unlock more recommendations!"))
                 }
             }
             .fullScreenCover(item: $selectedBookViewModel.selectedBook){ fullScreenBook in
