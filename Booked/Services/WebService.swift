@@ -7,6 +7,7 @@
 
 import Foundation
 
+// MARK: - Enum to get the error of the network response
 enum NetworkError: Error {
     case badUrl
     case invalidRequest
@@ -15,7 +16,9 @@ enum NetworkError: Error {
     case failedToDecodeResponse
 }
 
+// MARK: - Service to make calls to the web
 final class WebService {
+    // function to decode a response to a given url
     func downloadData<T: Codable>(fromURL: String) async -> T? {
         do {
             guard let url = URL(string: fromURL) else { throw NetworkError.badUrl }

@@ -10,32 +10,31 @@ import Kingfisher
 
 struct BookItemInGrid: View {
     
+    // MARK: - Properties
     @State var book: Book
-    @State var imageLoaded: Bool = false
     
+    // MARK: - Body
     var body: some View {
         VStack (alignment: .leading){
-            
-            if let extraLarge = book.imageLinks?.extraLarge{
-                KFImage(URL(string: extraLarge))
-                    .onSuccess{ result in
-                        withAnimation(.spring(response: 0.5, dampingFraction: 0.6)){
-                            imageLoaded = true
-                        }
-                    }
+            // If the book has large image display it
+            if let extraLarge = book.imageLinks?.large{
+                KFImage(URL(string: extraLarge)) /// king fisher (library for downloading and caching images from the web)
                     .onFailure { error in
                         print("Error loading image: \(error.localizedDescription)")
                     }
                     .placeholder { progress in
-                        Rectangle()
-                            .fill(.primary.opacity(0.5))
+                        RoundedRectangle(cornerRadius: 5)
+                            .fill(.primary.opacity(0.3))
                             .frame(width: 170, height: 255)
-                            .clipShape(RoundedRectangle(cornerRadius: 5))
                             .overlay{
-                                ProgressView()
-                                    .progressViewStyle(.circular)
+                                ZStack{
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .stroke(.primary.opacity(0.4), lineWidth: 2)
+                                    
+                                    ProgressView()
+                                        .progressViewStyle(.circular)
+                                }
                             }
-                        
                     }
                     .fade(duration: 0.5)
                     .resizable()
@@ -45,29 +44,28 @@ struct BookItemInGrid: View {
                     .clipShape(RoundedRectangle(cornerRadius: 5))
                     .overlay(
                         RoundedRectangle(cornerRadius: 5)
-                            .stroke(.primary.opacity(0.3), lineWidth: 0.5)
+                            .stroke(.primary.opacity(0.4), lineWidth: 0.5)
                     )
             } else {
                 if let id = book.id{
-                    KFImage(URL(string: "https://books.google.com/books/publisher/content/images/frontcover/\(id)?fife=w1200&source=gbs_api"))
-                        .onSuccess{ result in
-                            withAnimation(.spring(response: 0.5, dampingFraction: 0.6)){
-                                imageLoaded = true
-                            }
-                        }
+                    // Use the id of the book to get the front cover with a width of 500
+                    KFImage(URL(string: "https://books.google.com/books/publisher/content/images/frontcover/\(id)?fife=w500&source=gbs_api"))
                         .onFailure { error in
                             print("Error loading image: \(error.localizedDescription)")
                         }
                         .placeholder { progress in
-                            Rectangle()
-                                .fill(.primary.opacity(0.5))
+                            RoundedRectangle(cornerRadius: 5)
+                                .fill(.primary.opacity(0.3))
                                 .frame(width: 170, height: 255)
-                                .clipShape(RoundedRectangle(cornerRadius: 5))
                                 .overlay{
-                                    ProgressView()
-                                        .progressViewStyle(.circular)
+                                    ZStack{
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(.primary.opacity(0.4), lineWidth: 2)
+                                        
+                                        ProgressView()
+                                            .progressViewStyle(.circular)
+                                    }
                                 }
-                            
                         }
                         .fade(duration: 0.5)
                         .resizable()
@@ -77,17 +75,20 @@ struct BookItemInGrid: View {
                         .clipShape(RoundedRectangle(cornerRadius: 5))
                         .overlay(
                             RoundedRectangle(cornerRadius: 5)
-                                .stroke(.primary.opacity(0.3), lineWidth: 0.5)
+                                .stroke(.primary.opacity(0.4), lineWidth: 0.5)
                         )
                 }
             }
             
+            // MARK: - Book info
+            // Title
             if let title = book.title{
                 Text(title)
                     .font(.subheadline)
                     .lineLimit(2)
             }
             
+            // Authors
             if let authors = book.authors{
                 Text(concatAuthors(for: authors))
                     .font(.footnote)
@@ -97,6 +98,8 @@ struct BookItemInGrid: View {
         }
     }
     
+    // MARK: - Functions
+    // Function to concatenate all the authors with commas and add & to the final author
     func concatAuthors(for authors: [String]) -> String {
         guard !authors.isEmpty else { return "" }
         
@@ -109,6 +112,7 @@ struct BookItemInGrid: View {
         }
     }
     
+    // Function to convert from http to https
     func convertToSecureURL(urlString: String) -> String {
         if urlString.hasPrefix("http://") {
             let secureURLString = urlString.replacingOccurrences(of: "http://", with: "https://")

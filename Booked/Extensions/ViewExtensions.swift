@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+// Scroll offset to know when the user does a scroll
 struct ScrollOffsetPreferenceKey: PreferenceKey {
     static var defaultValue: CGPoint = .zero
     

@@ -8,5 +8,5 @@
 import Foundation
 
 final class SelectedBookVieModel: ObservableObject{
-    @Published var selectedBook: Book?
+    @Published var selectedBook: Book? // Get anytime the book that has been selected
 }

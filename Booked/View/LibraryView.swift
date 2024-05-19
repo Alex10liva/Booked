@@ -8,62 +8,55 @@
 import SwiftUI
 import SwiftData
 
-enum ListOrder{
-    case dateAscending
-    case dateDescending
-    case titleAscending
-    case titleDescending
-    case authorAshending
-    case authorDescending
-}
-
 struct LibraryView: View {
     
-    @State private var isAddSheetDisplayed: Bool = false
+    // MARK: - Environment properties
     @Environment(\.colorScheme) var colorScheme
-    @Binding var selectedTab: Tab?
-    @Binding var tabSelection: Int
+
+    // MARK: - Properties
+    @State private var isAddSheetDisplayed: Bool = false
     @State private var tabProgress: CGFloat = 0
-    @State private var addToListName: String = ""
-    @State var selectedListOrder: ListOrder = .dateDescending
+    @Binding var selectedTabInLibrary: Tab?
+    @Binding var tabSelection: Int
     
+    // MARK: - Body
     var body: some View {
         NavigationStack{
-            
             ZStack(alignment: .top){
                 GeometryReader{ geo in
                     
-                    let size = geo.size
+                    let size = geo.size // Size of the geometry reader
                     
+                    // Scroll view to have the option to drag to change between reading list and finished list
                     ScrollView(.horizontal){
-                        
                         LazyHStack(spacing: 0){
-                            ReadingListView(selectedTab: $selectedTab, tabSelection: $tabSelection, selectedListOrder: $selectedListOrder)
+                            ReadingListView(selectedTabInLibrary: $selectedTabInLibrary, tabSelection: $tabSelection)
                                 .id(Tab.readingList)
                                 .containerRelativeFrame(.horizontal)
                             
-                            FinishedListView(selectedTab: $selectedTab, tabSelection: $tabSelection, selectedListOrder: $selectedListOrder)
+                            FinishedListView(selectedTabInLibrary: $selectedTabInLibrary, tabSelection: $tabSelection)
                                 .id(Tab.finishedBooks)
                                 .containerRelativeFrame(.horizontal)
                         }
                         .scrollTargetLayout()
                         .offsetX{ value in
                             let progress = -value / (size.width * CGFloat(Tab.allCases.count - 1))
-                            tabProgress = max(min(progress, 1), 0)
+                            tabProgress = max(min(progress, 1), 0) // Get the progress of the scrolling tab in library
                         }
                     }
-                    .scrollPosition(id: $selectedTab)
+                    .scrollPosition(id: $selectedTabInLibrary)
                     .scrollIndicators(.hidden)
                     .scrollTargetBehavior(.paging)
                 }
                 
                 VStack{
-                    CustomTabBar(selectedTab: $selectedTab, tabProgress: $tabProgress)
+                    CustomTabBar(selectedTab: $selectedTabInLibrary, tabProgress: $tabProgress)
                         .padding(.top, 10)
                         .padding(.bottom, 45)
                         .background(
                             Rectangle()
                                 .fill(
+                                    // Change the color of the custom tab bar depending on the selected tab (reading list or finished books)
                                     Color(
                                         red: (1 - tabProgress) * 0.29 + tabProgress * 1.0,
                                         green: (1 - tabProgress) * 0.0 + tabProgress * 0.0,
@@ -73,6 +66,7 @@ struct LibraryView: View {
                                 )
                                 .fill(.thinMaterial)
                                 .mask {
+                                    // Add a gradient from thinMaterial to clear
                                     VStack(spacing: 0) {
                                         Rectangle()
                                         LinearGradient(
@@ -86,6 +80,7 @@ struct LibraryView: View {
                                     }
                                 }
                                 .overlay{
+                                    // Image to add a little bit of grain to the background of the custom tab bar
                                     Image("grain")
                                         .resizable()
                                         .aspectRatio(contentMode: .fill)
@@ -103,11 +98,8 @@ struct LibraryView: View {
                                         .ignoresSafeArea()
                                 }
                                 .ignoresSafeArea()
-                            
                         )
-                    
                     Spacer()
-                    Divider()
                 }
                 
             }
@@ -116,16 +108,23 @@ struct LibraryView: View {
             
             .toolbar{
                 ToolbarItem(placement: .topBarTrailing){
+                    
+                    // Menu to show two buttons
                     Menu {
+                        // Button to open the search view to add a new book in the reading list
                         Button{
-                            if self.selectedTab != .readingList {
+                            if self.selectedTabInLibrary != .readingList {
+                                // If the selected tab is not the reading list change to the reading list
                                 withAnimation {
-                                    self.selectedTab = .readingList
+                                    self.selectedTabInLibrary = .readingList
                                 }
+                                
+                                // And open the search view with a delay of 0.3s
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                     self.isAddSheetDisplayed.toggle()
                                 }
                             } else {
+                                // Open the search view
                                 self.isAddSheetDisplayed.toggle()
                             }
                         } label: {
@@ -133,15 +132,20 @@ struct LibraryView: View {
                             Text("Add to reading list")
                         }
                         
+                        // Button to open the search view to add a new book in the finished books list
                         Button{
-                            if self.selectedTab != .finishedBooks {
+                            if self.selectedTabInLibrary != .finishedBooks {
+                                // If the selected tab is not the finished books list change to the finished books list
                                 withAnimation {
-                                    self.selectedTab = .finishedBooks
+                                    self.selectedTabInLibrary = .finishedBooks
                                 }
+                                
+                                // And open the search view with a delay of 0.3s
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                     self.isAddSheetDisplayed.toggle()
                                 }
                             } else {
+                                // Open the search view
                                 self.isAddSheetDisplayed.toggle()
                             }
                         } label: {
@@ -154,7 +158,8 @@ struct LibraryView: View {
                     .bold()
                     .foregroundStyle(Color.accent)
                     .sheet(isPresented: $isAddSheetDisplayed){
-                        SearchView(list: selectedTab == .readingList ? "readingList" : "finishedList")
+                        // Open the search view passing the selected list to add a new book to this list
+                        SearchView(list: selectedTabInLibrary == .readingList ? "readingList" : "finishedList")
                     }
                 }
             }
@@ -163,5 +168,5 @@ struct LibraryView: View {
 }
 
 #Preview {
-    LibraryView(selectedTab: .constant(.readingList), tabSelection: .constant(2))
+    LibraryView(selectedTabInLibrary: .constant(.readingList), tabSelection: .constant(2))
 }

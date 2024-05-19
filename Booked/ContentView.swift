@@ -10,17 +10,17 @@ import SwiftData
 
 struct ContentView: View {
     @State private var tabSelection = 1
-    @State var selectedTab: Tab? = .readingList
+    @State var selectedTabInLibrary: Tab? = .readingList
     
     var body: some View {
         TabView(selection: $tabSelection){
-            DiscoverView(tabSelection: $tabSelection, selectedTab: $selectedTab)
+            DiscoverView(tabSelection: $tabSelection, selectedTabInLibrary: $selectedTabInLibrary)
                 .tabItem {
                     Label("Discover", systemImage: "sparkles")
                 }
                 .tag(1)
             
-            LibraryView(selectedTab: $selectedTab, tabSelection: $tabSelection)
+            LibraryView(selectedTabInLibrary: $selectedTabInLibrary, tabSelection: $tabSelection)
                 .tabItem {
                     Label("Library", systemImage: "books.vertical.fill")
                 }

@@ -7,24 +7,26 @@
 
 import SwiftUI
 
-import SwiftUI
-
 struct ActionButton: View {
     
     // MARK: - Enviroment properties
     @Environment(\.colorScheme) var colorScheme
     
+    // MARK: - Properties
     @State var icon: String?
     @State var label: String
     @State var isInBookDescription: Bool
     
+    // MARK: - Body
     var body: some View {
         
         HStack(spacing: 10){
+            // If an icon is passed as parameter show it
             if let icon = icon {
                 Image(systemName: icon)
             }
             
+            // Label of the button
             Text(label)
                 
         }

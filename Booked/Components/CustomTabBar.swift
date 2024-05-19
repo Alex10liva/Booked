@@ -9,16 +9,24 @@ import SwiftUI
 
 struct CustomTabBar: View {
     
+    // MARK: - Environment properties
     @Environment(\.colorScheme) var colorScheme
+    
+    // MARK: - Properties
     @Binding var selectedTab: Tab?
     @Binding var tabProgress: CGFloat
     
+    // MARK: - Body
     var body: some View {
         HStack(spacing: 0){
+            
+            // For each to display all the tabs that are created
             ForEach(Tab.allCases, id: \.rawValue) { tab in
                 HStack(spacing: 10){
+                    // Icon of the tab
                     Image(systemName: tab.systemImage)
                     
+                    // Label of the tab
                     Text(tab.rawValue)
                         .font(.footnote)
                 }
@@ -35,7 +43,7 @@ struct CustomTabBar: View {
             }
         }
         .tabMask(tabProgress)
-        .background{
+        .background{ // This part is for the capsule that moves dependind on the selected tab
             GeometryReader{ geo in
                 let size = geo.size
                 let capsuleWidth = size.width / CGFloat(Tab.allCases.count)

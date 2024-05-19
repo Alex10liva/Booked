@@ -10,55 +10,55 @@ import SwiftData
 import Kingfisher
 
 struct BookItemInSearch: View {
-    
+    // MARK: - Environment properties
+    @Environment(\.dismiss) var dismiss
     @Environment(\.modelContext) private var modelContext
+    
+    // MARK: - Swift data queries
+    // Filter the books that are in the recommendList
     @Query(filter: #Predicate<Book> { book in
         book.list == "recommendList"
     }, sort: \Book.addedDate, order: .reverse) private var recommendedBooks: [Book]
     
+    // Filter the books that are in the finishedList
     @Query(filter: #Predicate<Book> { book in
         book.list == "finishedList"
     }, sort: \Book.addedDate, order: .reverse) private var finishedBooks: [Book]
     
+    // Filter the books that are in the readingList
     @Query(filter: #Predicate<Book> { book in
         book.list == "readingList"
     }, sort: \Book.addedDate, order: .reverse) private var readingBooks: [Book]
     
-    @Query private var items: [Book]
-    
-    @Environment(\.dismiss) var dismiss
-    
-    @State var bookLocal: BookLocal
-    @State var imageLoaded: Bool = false
-    @State var imageURLs: [String] = []
-    @State var list: String
-    @State var sendHapticFeedback: Bool = false
+    // MARK: - Properties
     let webService = WebService()
-    @State private var lastXAuthors: [String] = []
     let defaults = UserDefaults.standard
-    @State var deletedBooksIDs: [String] = []
+    @State var bookLocal: BookLocal
+    @State var list: String
+    @State private var sendHapticFeedback: Bool = false
+    @State private var lastXAuthors: [String] = []
+    @State private var deletedBooksIDs: [String] = []
     
+    // MARK: - Body
     var body: some View {
         HStack{
-            
-            if let extraLarge = bookLocal.imageLinks?.extraLarge{
-                KFImage(URL(string: extraLarge))
-                    .onSuccess{ result in
-                        withAnimation(.spring(response: 0.5, dampingFraction: 0.6)){
-                            imageLoaded = true
-                        }
-                    }
+            // If the book has large image display it
+            if let extraLarge = bookLocal.imageLinks?.large{
+                KFImage(URL(string: extraLarge))  /// king fisher (library for downloading and caching images from the web)
                     .placeholder { progress in
-                        Rectangle()
-                            .fill(.primary.opacity(0.5))
-                            .clipShape(RoundedRectangle(cornerRadius: 5))
+                        RoundedRectangle(cornerRadius: 5)
+                            .fill(.primary.opacity(0.3))
                             .frame(width: 60, height: 90)
                             .overlay{
-                                ProgressView()
-                                    .progressViewStyle(.circular)
+                                ZStack{
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .stroke(.primary.opacity(0.4), lineWidth: 2)
+                                    
+                                    ProgressView()
+                                        .progressViewStyle(.circular)
+                                }
                             }
-                            .padding(.leading)
-                            .padding(.trailing)
+                            .padding(.horizontal)
                     }
                     .fade(duration: 0.5)
                     .resizable()
@@ -67,24 +67,23 @@ struct BookItemInSearch: View {
                     .frame(width: 60)
                     .padding(.trailing)
             } else {
+                // Use the id of the book to get the front cover with a width of 500
                 if let id = bookLocal.id {
-                    KFImage(URL(string: "https://books.google.com/books/publisher/content/images/frontcover/\(id)?fife=w1200&source=gbs_api"))
-                        .onSuccess{ result in
-                            withAnimation(.spring(response: 0.5, dampingFraction: 0.6)){
-                                imageLoaded = true
-                            }
-                        }
+                    KFImage(URL(string: "https://books.google.com/books/publisher/content/images/frontcover/\(id)?fife=w500&source=gbs_api"))
                         .placeholder { progress in
-                            Rectangle()
-                                .fill(.primary.opacity(0.5))
-                                .clipShape(RoundedRectangle(cornerRadius: 5))
+                            RoundedRectangle(cornerRadius: 5)
+                                .fill(.primary.opacity(0.3))
                                 .frame(width: 60, height: 90)
                                 .overlay{
-                                    ProgressView()
-                                        .progressViewStyle(.circular)
+                                    ZStack{
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(.primary.opacity(0.4), lineWidth: 2)
+                                        
+                                        ProgressView()
+                                            .progressViewStyle(.circular)
+                                    }
                                 }
-                                .padding(.leading)
-                                .padding(.trailing)
+                                .padding(.horizontal)
                         }
                         .fade(duration: 0.5)
                         .resizable()
@@ -95,8 +94,9 @@ struct BookItemInSearch: View {
                 }
             }
             
+            // MARK: - Book info
             VStack(alignment: .leading){
-                
+                // Title
                 if let title = bookLocal.title{
                     Text(title)
                         .font(.subheadline)
@@ -104,12 +104,14 @@ struct BookItemInSearch: View {
                         .bold()
                 }
                 
+                // Authors
                 if let authors = bookLocal.authors{
                     Text(concatAuthors(for: authors))
                         .font(.footnote)
                         .lineLimit(2)
                 }
                 
+                // Average rating with a star
                 if let averageRating = bookLocal.averageRating {
                     HStack(spacing: 5){
                         Image(systemName: "star.fill")
@@ -129,10 +131,11 @@ struct BookItemInSearch: View {
             }
             Spacer()
             
+            // Button to add the book to a list
             Button{
                 addItem(with: self.bookLocal)
                 sendHapticFeedback.toggle()
-                dismiss()
+                dismiss() // Dismiss the search sheet
             } label: {
                 Image(systemName: "plus.circle")
                     .font(.title3)
@@ -141,21 +144,28 @@ struct BookItemInSearch: View {
             .sensoryFeedback(.increase, trigger: sendHapticFeedback)
         }
         .onAppear{
+            // Get the books that has been deleted to not always recommend the same book
             deletedBooksIDs = (defaults.array(forKey: "deletedIDs") ?? []) as? [String] ?? [""]
         }
     }
     
+    // MARK: - Functions
+    // Function to add a book in the given list
     private func addItem(with book: BookLocal) {
         
+        // Create a variable with the book to save
         let bookToSave = Book(id: book.id, title: book.title, authors: book.authors, publisher: book.publisher, publishedDate: book.publishedDate, descriptionStored: book.descriptionStored, imageLinks: book.imageLinks, categories: book.categories, averageRating: book.averageRating, ratingsCount: book.ratingsCount, pageCount: book.pageCount, language: book.language, previewLink: book.previewLink, infoLink: book.infoLink, list: self.list, addedDate: Date.now)
         
         withAnimation {
             let newItem = bookToSave
-            modelContext.insert(newItem)
+            modelContext.insert(newItem) // Insert the item
         }
         
+        // MARK: - Recommendation system
+        // If the book that is beign added to the finished list
         if self.list == "finishedList" {
             
+            // Clean the recommend list
             do {
                 try modelContext.delete(
                     model: Book.self,
@@ -164,19 +174,22 @@ struct BookItemInSearch: View {
                     }
                 )
             } catch {
-                print("Error al eliminar libros recomendados existentes: \(error)")
+                print("Error deleting existing recommended books: \(error)")
             }
             
+            // Get the authors of the finished books
             let authorsQuery = finishedBooks.flatMap { $0.authors ?? [] }
             
             let lastXAuthorsCount = 5
+            // Get only the 5 last authors from the books
             getLastXAuthors(from: authorsQuery, count: lastXAuthorsCount)
             
+            // Send the last 5 authors to the api to get the best books from that author
             for author in lastXAuthors {
                 let query = "https://www.googleapis.com/books/v1/volumes?q=inauthor:\(author)&orderBy=relevance&maxResults=10"
                 Task {
                     guard let bookResponse: BookResponse = await webService.downloadData(fromURL: query) else {
-                        print("No se pudo obtener una respuesta de la API de Google Books.")
+                        print("Could not get a response from the Google Books API")
                         return
                     }
                     
@@ -186,6 +199,7 @@ struct BookItemInSearch: View {
         }
     }
     
+    // Function to concatenate all the authors with commas and add & to the final author
     func concatAuthors(for authors: [String]) -> String {
         guard !authors.isEmpty else { return "" }
         
@@ -198,6 +212,7 @@ struct BookItemInSearch: View {
         }
     }
     
+    // Function to convert from http to https
     func convertToSecureURL(urlString: String) -> String {
         if urlString.hasPrefix("http://") {
             let secureURLString = urlString.replacingOccurrences(of: "http://", with: "https://")
@@ -207,6 +222,7 @@ struct BookItemInSearch: View {
         }
     }
     
+    // Function to reduce the authors count to the given number
     func getLastXAuthors(from authors: [String], count: Int) {
         guard authors.count >= count else {
             lastXAuthors = authors
@@ -218,34 +234,10 @@ struct BookItemInSearch: View {
         lastXAuthors = Array(authors[startIndex..<endIndex])
     }
     
-    func getBookKeyPoints(from books: [Book]) -> [String: Any] {
-        var keyPoints: [String: Any] = [:]
-        
-        var genres: [String] = []
-        var authors: [String] = []
-        var keywords: [String] = []
-        
-        for book in books {
-            if let bookGenres = book.categories {
-                genres.append(contentsOf: bookGenres)
-            }
-            if let bookAuthors = book.authors {
-                authors.append(contentsOf: bookAuthors)
-            }
-            if let bookTitle = book.title {
-                keywords.append(bookTitle)
-            }
-        }
-        
-        keyPoints["genres"] = Array(Set(genres))
-        keyPoints["authors"] = Array(Set(authors))
-        
-        return keyPoints
-    }
-    
+    // Function to handle the response of the api of Google Books
     func handleBookResponse(bookResponse: BookResponse) {
         DispatchQueue.main.async {
-            
+            // We obtain the desired fields using the response of Google Books
             bookResponse.items.forEach { item in
                 let id = item.id
                 let title = item.volumeInfo.title
@@ -262,23 +254,28 @@ struct BookItemInSearch: View {
                 let previewLink = item.volumeInfo.previewLink
                 let infoLink = item.volumeInfo.infoLink
                 
+                // If any of these fields is nil discard the book (this because it can be a book without authors, image links, etc...)
                 guard let id = id, let title = title, let authors = authors, let publisher = publisher, let publishedDate = publishedDate, let description = description, let imageLinks = imageLinks else { return }
                 
+                // If the book is already in the deleted books don't recommend it again
                 if deletedBooksIDs.contains(where: {$0 == id }){
-                    print("El libro se borro con anterioridad")
+                    print("The book was previously deleted")
                     return
                 }
                 
+                // If the book is already in the recommended books list don't recommend it again
                 if recommendedBooks.contains(where: { $0.id == id }) {
-                    print("El libro con ID \(id) ya está en la lista de recomendaciones.")
+                    print("The book with ID \(id) is already in the recommendation list.")
                     return
                 }
                 
+                // If the book is already in the reading books list don't recommend it again
                 if readingBooks.contains(where: {$0.id == id}) || finishedBooks.contains(where: ({$0.id == id})){
-                    print("El libro con ID \(id) ya esta agregado")
+                    print("The book with ID \(id) is already added")
                     return
                 }
                 
+                // Create an instance of a Book
                 let newBook = Book(
                     id: id,
                     title: title,
@@ -297,7 +294,7 @@ struct BookItemInSearch: View {
                     list: "recommendList",
                     addedDate: Date.now
                 )
-                modelContext.insert(newBook)
+                modelContext.insert(newBook) // Insert the book to the model
             }
         }
     }

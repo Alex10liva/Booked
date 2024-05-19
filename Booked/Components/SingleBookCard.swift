@@ -10,35 +10,40 @@ import Kingfisher
 
 struct SingleBookCard: View {
     
-    let bookInfo: Book
-    @State var imageLoaded: Bool = false
+    // MARK: - Properties
+    var bookInfo: Book
     @State var isBookDescriptionDisplayed: Bool = false
-    
-    @State var bookCover: Image?
     @Binding var tabSelection: Int
     
+    // MARK: - Body
     var body: some View {
         VStack{
             
             Spacer()
             
+            // MARK: - Book cover art
+            // If the book has extra large image display it
             if let extraLarge = bookInfo.imageLinks?.extraLarge{
-                KFImage(URL(string: extraLarge))
-                    .onSuccess{ result in
-                        imageLoaded = true
-                        self.bookCover = Image(uiImage: result.image)
+                KFImage(URL(string: extraLarge)) /// king fisher (library for downloading and caching images from the web)
+                    .onFailure { error in
+                        print("Error loading image: \(error.localizedDescription)")
                     }
-                    .placeholder { progress in
-                        Rectangle()
-                            .fill(.primary.opacity(0.5))
-                            .clipShape(RoundedRectangle(cornerRadius: 5))
-                            .frame(width: 60, height: 90)
+                    .placeholder { _ in
+                        // While the image is loading show a rectangle with a progress view
+                        RoundedRectangle(cornerRadius: 5)
+                            .fill(.primary.opacity(0.3))
+                            .frame(maxWidth: .infinity)
+                            .aspectRatio(2/3, contentMode: .fit)
                             .overlay{
-                                ProgressView()
-                                    .progressViewStyle(.circular)
+                                ZStack{
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .stroke(.primary.opacity(0.4), lineWidth: 2)
+                                    
+                                    ProgressView()
+                                        .progressViewStyle(.circular)
+                                }
                             }
-                            .padding(.leading)
-                            .padding(.trailing)
+                            .padding(.horizontal)
                     }
                     .fade(duration: 0.5)
                     .resizable()
@@ -50,25 +55,23 @@ struct SingleBookCard: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .padding(.horizontal)
                     .shadow(color: .black.opacity(0.13), radius: 25, x: 0.0, y: 8.0)
-                
-                
             } else {
+                // Use the id of the book to get the front cover with a width of 1000
                 if let id = bookInfo.id {
-                    KFImage(URL(string: "https://books.google.com/books/publisher/content/images/frontcover/\(id)?fife=w1200&source=gbs_api"))
-                        .onSuccess{ result in
-                            imageLoaded = true
-                            self.bookCover = Image(uiImage: result.image)
+                    KFImage(URL(string: "https://books.google.com/books/publisher/content/images/frontcover/\(id)?fife=w1000&source=gbs_api"))
+                        .onFailure { error in
+                            print("Error loading image: \(error.localizedDescription)")
                         }
-                        .placeholder { progress in
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(.primary.opacity(0.5))
-                                .clipShape(RoundedRectangle(cornerRadius: 5))
-                                .frame(width: 60, height: 90)
+                        .placeholder { _ in
+                            // While the image is loading show a rectangle with a progress view
+                            RoundedRectangle(cornerRadius: 5)
+                                .fill(.primary.opacity(0.3))
+                                .frame(maxWidth: .infinity)
+                                .aspectRatio(2/3, contentMode: .fit)
                                 .overlay{
-                                    
                                     ZStack{
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(.primary.opacity(0.3), lineWidth: 2)
+                                        RoundedRectangle(cornerRadius: 5)
+                                            .stroke(.primary.opacity(0.4), lineWidth: 2)
                                         
                                         ProgressView()
                                             .progressViewStyle(.circular)
@@ -89,8 +92,9 @@ struct SingleBookCard: View {
                 }
             }
             
+            // MARK: - Book info
             VStack(spacing: 5){
-                
+                // Title
                 if let title = bookInfo.title {
                     Text(title)
                         .font(.title)
@@ -99,6 +103,7 @@ struct SingleBookCard: View {
                         .multilineTextAlignment(.center)
                 }
                 
+                // Authors
                 if let authors = bookInfo.authors {
                     Text(concatAuthors(for: authors))
                         .font(.title3)
@@ -113,15 +118,16 @@ struct SingleBookCard: View {
         .padding()
         .onTapGesture {
             withAnimation{
-                isBookDescriptionDisplayed.toggle()
+                isBookDescriptionDisplayed.toggle() // Open the book description in full screen
             }
         }
         .fullScreenCover(isPresented: $isBookDescriptionDisplayed){
-            BookDescriptionView(book: bookInfo, selectedTab: .constant(.readingList), tabSelection: $tabSelection, showOptions: false, showActionButton: true)
-            
+            BookDescriptionView(book: bookInfo, showOptions: false, selectedTabInLibrary: .constant(.readingList), tabSelection: $tabSelection, showActionButton: true)
         }
     }
     
+    // MARK: - Functions
+    // Function to concatenate all the authors with commas and add & to the final author
     func concatAuthors(for authors: [String]) -> String {
         guard !authors.isEmpty else { return "" }
         

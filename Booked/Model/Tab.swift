@@ -7,6 +7,7 @@
 
 import Foundation
 
+// MARK: - Enum to define the tabs in the application
 enum Tab: String, CaseIterable {
     case readingList = "Reading List"
     case finishedBooks = "Finished Books"
